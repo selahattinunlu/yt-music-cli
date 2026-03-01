@@ -1,15 +1,45 @@
 # yt-music-cli
 
-To install dependencies:
+YouTube Music player for your terminal. Search and stream music directly from YouTube — no browser, no ads, no distractions.
 
-```bash
-bun install
+## Requirements
+
+- [mpv](https://mpv.io) — media player
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) — YouTube stream extractor
+
+```sh
+brew install mpv yt-dlp
 ```
 
-To run:
+## Installation
 
-```bash
-bun run index.ts
+```sh
+npm install -g yt-music-cli
 ```
 
-This project was created using `bun init` in bun v1.3.8. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+## Usage
+
+```sh
+yt-music
+```
+
+## Controls
+
+| Key | Action |
+|-----|--------|
+| Type + `Enter` | Search |
+| `↑` / `↓` | Navigate results |
+| `Enter` | Play selected track |
+| `Space` | Pause / Resume |
+| `←` / `→` | Seek -10s / +10s |
+| `N` | Next track |
+| `S` | Back to search |
+| `Q` / `Ctrl+C` | Quit |
+
+## How it works
+
+Plays audio directly from YouTube via `yt-dlp` + `mpv` — nothing is downloaded to disk. When you start a track, a radio mix is automatically queued in the background.
+
+## License
+
+MIT
