@@ -1,6 +1,6 @@
 {
   "name": "yt-music-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "YouTube Music player for your terminal",
   "type": "module",
   "license": "MIT",
@@ -22,7 +22,14 @@
     "@selahattinunlu/yt-music-cli-linux-arm64": "0.1.0",
     "@selahattinunlu/yt-music-cli-win32-x64": "0.1.0"
   },
-  "keywords": ["youtube", "music", "cli", "terminal", "player", "mpv"],
+  "keywords": [
+    "youtube",
+    "music",
+    "cli",
+    "terminal",
+    "player",
+    "mpv"
+  ],
   "devDependencies": {
     "@types/bun": "latest",
     "chalk": "^5.6.2",
