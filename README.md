@@ -7,8 +7,21 @@ YouTube Music player for your terminal. Search and stream music directly from Yo
 - [mpv](https://mpv.io) — media player
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) — YouTube stream extractor
 
+**macOS**
 ```sh
 brew install mpv yt-dlp
+```
+
+**Linux (Debian/Ubuntu)**
+```sh
+sudo apt install mpv
+pip install yt-dlp
+```
+
+**Windows**
+```sh
+winget install mpv.mpv
+winget install yt-dlp.yt-dlp
 ```
 
 ## Installation

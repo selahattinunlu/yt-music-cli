@@ -1,0 +1,10 @@
+{
+  "name": "yt-music-cli-win32-x64",
+  "version": "0.1.0",
+  "description": "win32 x64 binary for yt-music-cli",
+  "os": ["win32"],
+  "cpu": ["x64"],
+  "main": "index.js",
+  "files": ["index.js", "bin/"],
+  "license": "MIT"
+}

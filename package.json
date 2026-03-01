@@ -19,7 +19,8 @@
     "yt-music-cli-darwin-arm64": "0.1.0",
     "yt-music-cli-darwin-x64": "0.1.0",
     "yt-music-cli-linux-x64": "0.1.0",
-    "yt-music-cli-linux-arm64": "0.1.0"
+    "yt-music-cli-linux-arm64": "0.1.0",
+    "yt-music-cli-win32-x64": "0.1.0"
   },
   "keywords": ["youtube", "music", "cli", "terminal", "player", "mpv"],
   "devDependencies": {
