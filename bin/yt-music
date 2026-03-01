@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+import { spawnSync } from 'child_process';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+
+const PLATFORMS = {
+  'darwin arm64': 'yt-music-cli-darwin-arm64',
+  'darwin x64':   'yt-music-cli-darwin-x64',
+  'linux x64':    'yt-music-cli-linux-x64',
+  'linux arm64':  'yt-music-cli-linux-arm64',
+};
+
+const key = `${process.platform} ${process.arch}`;
+const pkg = PLATFORMS[key];
+
+if (!pkg) {
+  process.stderr.write(`yt-music: Unsupported platform: ${process.platform} ${process.arch}\n`);
+  process.exit(1);
+}
+
+let bin;
+try {
+  bin = require(pkg);
+} catch {
+  process.stderr.write(
+    `yt-music: Platform package "${pkg}" not found.\n` +
+    `Try reinstalling: npm install -g yt-music-cli\n`
+  );
+  process.exit(1);
+}
+
+const result = spawnSync(bin, process.argv.slice(2), { stdio: 'inherit' });
+process.exit(result.status ?? 0);
