@@ -1,5 +1,5 @@
 {
-  "name": "yt-music-cli-linux-arm64",
+  "name": "@selahattinunlu/yt-music-cli-linux-arm64",
   "version": "0.1.0",
   "description": "linux arm64 binary for yt-music-cli",
   "os": ["linux"],
