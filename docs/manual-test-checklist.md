@@ -21,6 +21,7 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Sarki adi ekranda gosterilir
 - [ ] Progress bar ilerler
 - [ ] Sure bilgisi (gecen/toplam) dogru gosterilir
+- [ ] Player ekrani titremeden guncellenir (flicker yok)
 
 ## Duraklat / Devam
 

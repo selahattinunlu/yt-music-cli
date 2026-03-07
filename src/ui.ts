@@ -21,7 +21,15 @@ function clip(str: string, max: number): string {
 }
 
 export function clearScreen() {
-  process.stdout.write('\x1Bc');
+  process.stdout.write('\x1B[H\x1B[2J');
+}
+
+function cursorHome() {
+  process.stdout.write('\x1B[H');
+}
+
+function clearBelow() {
+  process.stdout.write('\x1B[J');
 }
 
 export function renderSearch(query: string, hint = '', hasFavorites = false) {
@@ -56,7 +64,7 @@ export function renderResults(tracks: Track[], selected: number) {
 }
 
 export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false) {
-  clearScreen();
+  cursorHome();
 
   const favIcon = favorite ? chalk.red(' ♥') : '';
   const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
@@ -83,6 +91,7 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
   }
 
   console.log(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    S Arama    Q Çıkış\n'));
+  clearBelow();
 }
 
 export function renderFavorites(favorites: Track[], selected: number) {
