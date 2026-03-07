@@ -78,5 +78,5 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
     console.log();
   }
 
-  console.log(chalk.gray('  Space Duraklat/Devam    N Sonraki    ←→ ±10s    S Arama    Q Çıkış\n'));
+  console.log(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    S Arama    Q Çıkış\n'));
 }

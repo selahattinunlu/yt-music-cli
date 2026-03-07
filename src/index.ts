@@ -16,8 +16,9 @@ let searchQuery = '';
 let results: Track[] = [];
 let selectedIdx = 0;
 let queue: Track[] = [];
+let history: Track[] = [];
 let fetchingMix = false;
-let currentTrackId = '';
+let currentTrack: Track | null = null;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 const player = new Player();
@@ -41,8 +42,9 @@ player.on('end-file', async (event: { reason: string }) => {
   if (event.reason !== 'eof' || appState !== 'playing') return;
 
   if (queue.length > 0) {
+    if (currentTrack) history.push(currentTrack);
     const next = queue.shift()!;
-    currentTrackId = next.id;
+    currentTrack = next;
     await player.loadTrack(next.url);
 
     // Refill mix when queue gets low
@@ -76,9 +78,10 @@ function goToSearch() {
 
 async function startPlaying(track: Track) {
   appState = 'playing';
+  if (currentTrack) history.push(currentTrack);
   queue = [];
   fetchingMix = true;
-  currentTrackId = track.id;
+  currentTrack = track;
 
   await player.loadTrack(track.url);
 
@@ -92,8 +95,8 @@ async function startPlaying(track: Track) {
 
   // Fetch mix in background
   fetchMix(track.id, 25)
-    .then(tracks => {
-      queue = tracks.filter(t => t.id !== track.id).slice(0, 22);
+    .then(mixTracks => {
+      queue = mixTracks.filter(t => t.id !== track.id).slice(0, 22);
     })
     .catch(() => {})
     .finally(() => { fetchingMix = false; });
@@ -159,10 +162,20 @@ async function onPlayingKey(key: string) {
     case 'n':
     case 'N':
       if (queue.length > 0) {
+        if (currentTrack) history.push(currentTrack);
         const next = queue.shift()!;
-        currentTrackId = next.id;
+        currentTrack = next;
         await player.loadTrack(next.url);
         if (queue.length < 5) refillQueue(next.id);
+      }
+      break;
+    case 'p':
+    case 'P':
+      if (history.length > 0) {
+        if (currentTrack) queue.unshift(currentTrack);
+        const prev = history.pop()!;
+        currentTrack = prev;
+        await player.loadTrack(prev.url);
       }
       break;
     case LEFT:
