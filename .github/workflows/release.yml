@@ -31,10 +31,10 @@ jobs:
       - name: Set version from tag
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          npm version $VERSION --no-git-tag-version
+          npm version $VERSION --no-git-tag-version --allow-same-version
           for pkg in darwin-arm64 darwin-x64 linux-x64 linux-arm64 win32-x64; do
             cd npm/$pkg
-            npm version $VERSION --no-git-tag-version
+            npm version $VERSION --no-git-tag-version --allow-same-version
             cd ../..
           done
 
