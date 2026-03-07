@@ -24,11 +24,14 @@ export function clearScreen() {
   process.stdout.write('\x1Bc');
 }
 
-export function renderSearch(query: string, hint = '') {
+export function renderSearch(query: string, hint = '', hasFavorites = false) {
   clearScreen();
   console.log(chalk.cyan.bold('\n  yt-music-cli\n'));
   if (hint) console.log(chalk.gray(`  ${hint}\n`));
   process.stdout.write(chalk.white('  Search: ') + chalk.white.bold(query) + chalk.gray(' █'));
+  if (hasFavorites && !query) {
+    console.log(chalk.gray('\n\n  L  Favoriler'));
+  }
 }
 
 export function renderResults(tracks: Track[], selected: number) {

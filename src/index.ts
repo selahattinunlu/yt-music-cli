@@ -76,7 +76,7 @@ function goToSearch() {
   appState = 'search-input';
   searchQuery = '';
   if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
-  renderSearch('');
+  renderSearch('', '', favorites.length > 0);
 }
 
 async function startPlaying(track: Track) {
@@ -120,27 +120,35 @@ async function handleKey(key: string) {
 }
 
 async function onSearchInput(key: string) {
+  if ((key === 'l' || key === 'L') && !searchQuery) {
+    if (favorites.length > 0) {
+      appState = 'favorites';
+      favSelectedIdx = 0;
+      renderFavorites(favorites, favSelectedIdx);
+    }
+    return;
+  }
   if (key === '\r' || key === '\n') {
     if (!searchQuery.trim()) return;
     renderSearch('Aranıyor...', `"${searchQuery}"`);
     try {
       results = await search(searchQuery);
       if (results.length === 0) {
-        renderSearch('', 'Sonuç bulunamadı. Tekrar dene.');
+        renderSearch('', 'Sonuç bulunamadı. Tekrar dene.', favorites.length > 0);
         return;
       }
       appState = 'search-results';
       selectedIdx = 0;
       renderResults(results, selectedIdx);
     } catch {
-      renderSearch('', 'Hata oluştu. yt-dlp kurulu olduğundan emin ol.');
+      renderSearch('', 'Hata oluştu. yt-dlp kurulu olduğundan emin ol.', favorites.length > 0);
     }
   } else if (key === '\x7F' || key === '\b') {
     searchQuery = searchQuery.slice(0, -1);
-    renderSearch(searchQuery);
+    renderSearch(searchQuery, '', favorites.length > 0);
   } else if (key.length === 1 && key >= ' ') {
     searchQuery += key;
-    renderSearch(searchQuery);
+    renderSearch(searchQuery, '', favorites.length > 0);
   }
 }
 

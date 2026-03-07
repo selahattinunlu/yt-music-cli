@@ -62,6 +62,9 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Favori listesinde Q ile player'a geri doner
 - [ ] Favoriler uygulama kapatilip acildiktan sonra da korunur
 - [ ] Favori yokken L bir sey yapmaz
+- [ ] Arama ekraninda (query bos iken) L ile favori listesine gidilir
+- [ ] Arama ekraninda favori varsa "L  Favoriler" ipucu gosterilir
+- [ ] Favori listesinden Q ile arama ekranina geri doner (player yoksa)
 
 ## Genel
 
