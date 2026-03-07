@@ -65,6 +65,9 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Favori yokken L bir sey yapmaz
 - [ ] Arama ekraninda (query bos iken) L ile favori listesine gidilir
 - [ ] Arama ekraninda favori varsa "L  Favoriler" ipucu gosterilir
+- [ ] Arama ekraninda playlist varsa "O  Playlistler" ipucu gosterilir
+- [ ] Arama ekraninda (query bos iken) O ile playlist listesine gidilir
+- [ ] Playlist yokken O bir sey yapmaz
 - [ ] Favori listesinden Q ile arama ekranina geri doner (player yoksa)
 
 ## Playlistler
@@ -98,6 +101,15 @@ Her release oncesi bu listeyi kontrol et.
 ### Playlist Silme
 - [ ] Playlist listesinde D ile playlist silinir
 - [ ] Playlist detayinda D ile sarki playlistten silinir
+
+### Playlist Yeniden Adlandirma
+- [ ] Playlist listesinde R ile yeniden adlandirma ekranina gidilir
+- [ ] Mevcut playlist ismi gosterilir ve uzerine yazilabilir
+- [ ] Enter ile yeni isim kaydedilir ve playlist listesine donulur
+- [ ] Esc ile isim degisikligi iptal edilir ve playlist listesine donulur
+- [ ] Bos isim ile Enter'a basilinca bir sey olmaz
+- [ ] Degisiklik uygulama kapatilip acildiktan sonra da korunur (playlists.json)
+- [ ] Playlist yokken R bir sey yapmaz
 
 ### Playlist Navigasyon
 - [ ] Playlist detayinda Q ile playlist listesine doner

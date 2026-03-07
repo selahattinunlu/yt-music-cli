@@ -1,7 +1,7 @@
 import { search, fetchMix } from './search';
 import { Player } from './player';
-import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen, renderPlaylistList, renderPlaylistDetail, renderPlaylistPicker, renderNewPlaylistInput } from './ui';
-import { loadFavorites, isFavorite, toggleFavorite, loadPlaylists, savePlaylists, createPlaylist, deletePlaylist, addTrackToPlaylist, removeTrackFromPlaylist } from './config';
+import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen, renderPlaylistList, renderPlaylistDetail, renderPlaylistPicker, renderNewPlaylistInput, renderRenamePlaylistInput } from './ui';
+import { loadFavorites, isFavorite, toggleFavorite, loadPlaylists, savePlaylists, createPlaylist, deletePlaylist, renamePlaylist, addTrackToPlaylist, removeTrackFromPlaylist } from './config';
 import type { Playlist } from './types';
 import type { Track } from './types';
 
@@ -11,7 +11,7 @@ const DOWN = '\x1B[B';
 const LEFT = '\x1B[D';
 const RIGHT = '\x1B[C';
 
-type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites' | 'playlist-list' | 'playlist-detail' | 'playlist-picker' | 'new-playlist';
+type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites' | 'playlist-list' | 'playlist-detail' | 'playlist-picker' | 'new-playlist' | 'rename-playlist';
 
 let appState: AppState = 'search-input';
 let searchQuery = '';
@@ -29,6 +29,8 @@ let plDetailIdx = 0;
 let currentPlaylist: Playlist | null = null;
 let plPickerIdx = 0;
 let newPlaylistName = '';
+let renamePlaylistName = '';
+let renamingPlaylistId = '';
 let prePlaylistState: AppState = 'playing';
 let shuffleMode = false;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
@@ -94,7 +96,7 @@ function goToSearch() {
   appState = 'search-input';
   searchQuery = '';
   if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
-  renderSearch('', '', favorites.length > 0);
+  renderSearch('', '', favorites.length > 0, playlists.length > 0);
 }
 
 async function startPlaying(track: Track) {
@@ -140,6 +142,7 @@ async function handleKey(key: string) {
   else if (appState === 'playlist-detail') await onPlaylistDetailKey(key);
   else if (appState === 'playlist-picker') await onPlaylistPickerKey(key);
   else if (appState === 'new-playlist') onNewPlaylistKey(key);
+  else if (appState === 'rename-playlist') onRenamePlaylistKey(key);
 }
 
 async function onSearchInput(key: string) {
@@ -151,27 +154,35 @@ async function onSearchInput(key: string) {
     }
     return;
   }
+  if ((key === 'o' || key === 'O') && !searchQuery) {
+    if (playlists.length > 0) {
+      appState = 'playlist-list';
+      plSelectedIdx = 0;
+      renderPlaylistList(playlists, plSelectedIdx);
+    }
+    return;
+  }
   if (key === '\r' || key === '\n') {
     if (!searchQuery.trim()) return;
     renderSearch('Aranıyor...', `"${searchQuery}"`);
     try {
       results = await search(searchQuery);
       if (results.length === 0) {
-        renderSearch('', 'Sonuç bulunamadı. Tekrar dene.', favorites.length > 0);
+        renderSearch('', 'Sonuç bulunamadı. Tekrar dene.', favorites.length > 0, playlists.length > 0);
         return;
       }
       appState = 'search-results';
       selectedIdx = 0;
       renderResults(results, selectedIdx);
     } catch {
-      renderSearch('', 'Hata oluştu. yt-dlp kurulu olduğundan emin ol.', favorites.length > 0);
+      renderSearch('', 'Hata oluştu. yt-dlp kurulu olduğundan emin ol.', favorites.length > 0, playlists.length > 0);
     }
   } else if (key === '\x7F' || key === '\b') {
     searchQuery = searchQuery.slice(0, -1);
-    renderSearch(searchQuery, '', favorites.length > 0);
+    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0);
   } else if (key.length === 1 && key >= ' ') {
     searchQuery += key;
-    renderSearch(searchQuery, '', favorites.length > 0);
+    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0);
   }
 }
 
@@ -316,6 +327,12 @@ async function onPlaylistListKey(key: string) {
     appState = 'new-playlist';
     newPlaylistName = '';
     renderNewPlaylistInput(newPlaylistName);
+  } else if ((key === 'r' || key === 'R') && playlists.length > 0) {
+    const pl = playlists[plSelectedIdx]!;
+    renamingPlaylistId = pl.id;
+    renamePlaylistName = pl.name;
+    appState = 'rename-playlist';
+    renderRenamePlaylistInput(renamePlaylistName);
   } else if ((key === 'd' || key === 'D') && playlists.length > 0) {
     playlists = deletePlaylist(playlists, playlists[plSelectedIdx]!.id);
     plSelectedIdx = Math.min(plSelectedIdx, playlists.length - 1);
@@ -394,6 +411,24 @@ function onNewPlaylistKey(key: string) {
   } else if (key.length === 1 && key >= ' ') {
     newPlaylistName += key;
     renderNewPlaylistInput(newPlaylistName);
+  }
+}
+
+function onRenamePlaylistKey(key: string) {
+  if (key === '\x1B') {
+    appState = 'playlist-list';
+    renderPlaylistList(playlists, plSelectedIdx);
+  } else if (key === '\r' || key === '\n') {
+    if (!renamePlaylistName.trim()) return;
+    renamePlaylist(playlists, renamingPlaylistId, renamePlaylistName.trim());
+    appState = 'playlist-list';
+    renderPlaylistList(playlists, plSelectedIdx);
+  } else if (key === '\x7F' || key === '\b') {
+    renamePlaylistName = renamePlaylistName.slice(0, -1);
+    renderRenamePlaylistInput(renamePlaylistName);
+  } else if (key.length === 1 && key >= ' ') {
+    renamePlaylistName += key;
+    renderRenamePlaylistInput(renamePlaylistName);
   }
 }
 

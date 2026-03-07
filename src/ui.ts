@@ -24,13 +24,15 @@ export function clearScreen() {
   process.stdout.write('\x1B[H\x1B[2J');
 }
 
-export function renderSearch(query: string, hint = '', hasFavorites = false) {
+export function renderSearch(query: string, hint = '', hasFavorites = false, hasPlaylists = false) {
   let out = '\x1B[H\x1B[2J';
   out += chalk.cyan.bold('\n  yt-music-cli\n') + '\n';
   if (hint) out += chalk.gray(`  ${hint}\n`) + '\n';
   out += chalk.white('  Search: ') + chalk.white.bold(query) + chalk.gray(' █');
-  if (hasFavorites && !query) {
-    out += chalk.gray('\n\n  L  Favoriler');
+  if (!query && (hasFavorites || hasPlaylists)) {
+    out += '\n';
+    if (hasFavorites) out += chalk.gray('\n  L  Favoriler');
+    if (hasPlaylists) out += chalk.gray('\n  O  Playlistler');
   }
   process.stdout.write(out);
 }
@@ -149,7 +151,7 @@ export function renderPlaylistList(playlists: Playlist[], selected: number) {
     }
   }
 
-  out += chalk.gray('\n  ↑↓  Gezin    Enter  Aç    C  Yeni    D  Sil    Q  Geri\n') + '\n';
+  out += chalk.gray('\n  ↑↓  Gezin    Enter  Aç    C  Yeni    R  Yeniden Adlandır    D  Sil    Q  Geri\n') + '\n';
   process.stdout.write(out);
 }
 
@@ -206,6 +208,14 @@ export function renderPlaylistPicker(playlists: Playlist[], selected: number, tr
   }
 
   out += chalk.gray('\n  ↑↓  Gezin    Enter  Ekle    C  Yeni Playlist    Q  İptal\n') + '\n';
+  process.stdout.write(out);
+}
+
+export function renderRenamePlaylistInput(name: string) {
+  let out = '\x1B[H\x1B[2J';
+  out += chalk.cyan.bold('\n  yt-music-cli') + chalk.gray('  ─  Playlist Yeniden Adlandır\n') + '\n';
+  out += chalk.white('  Yeni isim: ') + chalk.white.bold(name) + chalk.gray(' █\n') + '\n';
+  out += chalk.gray('  Enter  Kaydet    Esc  İptal\n') + '\n';
   process.stdout.write(out);
 }
 

@@ -85,6 +85,13 @@ export function addTrackToPlaylist(playlists: Playlist[], playlistId: string, tr
   return true;
 }
 
+export function renamePlaylist(playlists: Playlist[], id: string, newName: string) {
+  const playlist = playlists.find(p => p.id === id);
+  if (!playlist) return;
+  playlist.name = newName;
+  savePlaylists(playlists);
+}
+
 export function removeTrackFromPlaylist(playlists: Playlist[], playlistId: string, trackIdx: number) {
   const playlist = playlists.find(p => p.id === playlistId);
   if (!playlist) return;
