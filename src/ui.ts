@@ -56,6 +56,8 @@ export function renderResults(tracks: Track[], selected: number) {
   process.stdout.write(out);
 }
 
+const CLR = '\x1B[K'; // clear to end of line
+
 export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false) {
   const favIcon = favorite ? chalk.red(' ♥') : '';
   const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
@@ -63,27 +65,35 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
   const progress = bar(state.timePos, state.duration);
   const time = `${fmt(state.timePos)} / ${fmt(state.duration)}`;
 
-  let out = '\x1B[H\x1B[2J';
-  out += chalk.cyan.bold('\n  yt-music-cli\n') + '\n';
-  out += `  ${status}\n`;
-  out += `\n  ${chalk.white.bold(title)}\n` + '\n';
-  out += `  ${progress}  ${chalk.gray(time)}\n` + '\n';
+  const lines = [
+    '',
+    chalk.cyan.bold('  yt-music-cli'),
+    '',
+    `  ${status}`,
+    '',
+    `  ${chalk.white.bold(title)}`,
+    '',
+    `  ${progress}  ${chalk.gray(time)}`,
+    '',
+  ];
 
   if (fetchingMix && queue.length === 0) {
-    out += chalk.gray('  Mix yükleniyor...\n') + '\n';
+    lines.push(chalk.gray('  Mix yükleniyor...'), '');
   } else if (queue.length > 0) {
-    out += chalk.gray('  Sırada:') + '\n';
+    lines.push(chalk.gray('  Sırada:'));
     for (let i = 0; i < Math.min(queue.length, 4); i++) {
-      out += chalk.gray(`    ${i + 1}. ${clip(queue[i].title, 52)}`) + '\n';
+      lines.push(chalk.gray(`    ${i + 1}. ${clip(queue[i].title, 52)}`));
     }
     if (queue.length > 4) {
-      out += chalk.gray(`    +${queue.length - 4} şarkı daha`) + '\n';
+      lines.push(chalk.gray(`    +${queue.length - 4} şarkı daha`));
     }
-    out += '\n';
+    lines.push('');
   }
 
-  out += chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    S Arama    Q Çıkış\n') + '\n';
-  process.stdout.write(out);
+  lines.push(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    S Arama    Q Çıkış'), '');
+
+  // Cursor home, overwrite each line with clear-to-end, then clear remaining below
+  process.stdout.write('\x1B[H' + lines.map(l => l + CLR).join('\n') + '\x1B[J');
 }
 
 export function renderFavorites(favorites: Track[], selected: number) {
