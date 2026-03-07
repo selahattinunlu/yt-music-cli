@@ -10,11 +10,11 @@ Playlist'ten bir sarki baslatildiginda kuyruga playlist'in kalan sarkilari eklen
 
 ## Kabul Kriterleri
 
-- [ ] Playlist detayinda bir sarki secildiginde, o sarkidan sonraki playlist sarkilari kuyruga eklenir
-- [ ] Kuyrukta once playlist sarkilari calinir
-- [ ] Playlist sarkilari bitince YouTube Mix ile devam edilir
-- [ ] Shuffle modu aktifken playlist sarkilari da karistirilir
-- [ ] Player ekraninda siradaki sarkilar dogru gosterilir
+- [x] Playlist detayinda bir sarki secildiginde, o sarkidan sonraki playlist sarkilari kuyruga eklenir
+- [x] Kuyrukta once playlist sarkilari calinir
+- [x] Playlist sarkilari bitince YouTube Mix ile devam edilir
+- [x] Shuffle modu aktifken playlist sarkilari da karistirilir
+- [x] Player ekraninda siradaki sarkilar dogru gosterilir
 
 ## Teknik Notlar
 

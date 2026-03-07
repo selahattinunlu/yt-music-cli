@@ -10,11 +10,11 @@ Kullanicinin mevcut bir playlist'in ismini degistirebilmesi.
 
 ## Kabul Kriterleri
 
-- [ ] Playlist listesinde bir tus ile yeniden adlandirma moduna girilebilir
-- [ ] Mevcut isim gosterilir ve uzerine yazilabilir
-- [ ] Enter ile yeni isim kaydedilir
-- [ ] Esc ile isim degisikligi iptal edilir
-- [ ] Degisiklik `playlists.json` dosyasina yansir
+- [x] Playlist listesinde bir tus ile yeniden adlandirma moduna girilebilir
+- [x] Mevcut isim gosterilir ve uzerine yazilabilir
+- [x] Enter ile yeni isim kaydedilir
+- [x] Esc ile isim degisikligi iptal edilir
+- [x] Degisiklik `playlists.json` dosyasina yansir
 
 ## Teknik Notlar
 
