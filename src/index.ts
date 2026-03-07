@@ -1,7 +1,8 @@
 import { search, fetchMix } from './search';
 import { Player } from './player';
-import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen } from './ui';
-import { loadFavorites, isFavorite, toggleFavorite } from './config';
+import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen, renderPlaylistList, renderPlaylistDetail, renderPlaylistPicker, renderNewPlaylistInput } from './ui';
+import { loadFavorites, isFavorite, toggleFavorite, loadPlaylists, savePlaylists, createPlaylist, deletePlaylist, addTrackToPlaylist, removeTrackFromPlaylist } from './config';
+import type { Playlist } from './types';
 import type { Track } from './types';
 
 // Arrow keys & special keys
@@ -10,7 +11,7 @@ const DOWN = '\x1B[B';
 const LEFT = '\x1B[D';
 const RIGHT = '\x1B[C';
 
-type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites';
+type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites' | 'playlist-list' | 'playlist-detail' | 'playlist-picker' | 'new-playlist';
 
 let appState: AppState = 'search-input';
 let searchQuery = '';
@@ -22,6 +23,13 @@ let fetchingMix = false;
 let currentTrack: Track | null = null;
 let favorites: Track[] = [];
 let favSelectedIdx = 0;
+let playlists: Playlist[] = [];
+let plSelectedIdx = 0;
+let plDetailIdx = 0;
+let currentPlaylist: Playlist | null = null;
+let plPickerIdx = 0;
+let newPlaylistName = '';
+let prePlaylistState: AppState = 'playing';
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 const player = new Player();
@@ -116,6 +124,10 @@ async function handleKey(key: string) {
   else if (appState === 'search-results') await onResultsKey(key);
   else if (appState === 'playing') await onPlayingKey(key);
   else if (appState === 'favorites') await onFavoritesKey(key);
+  else if (appState === 'playlist-list') await onPlaylistListKey(key);
+  else if (appState === 'playlist-detail') await onPlaylistDetailKey(key);
+  else if (appState === 'playlist-picker') await onPlaylistPickerKey(key);
+  else if (appState === 'new-playlist') onNewPlaylistKey(key);
 }
 
 async function onSearchInput(key: string) {
@@ -212,6 +224,23 @@ async function onPlayingKey(key: string) {
         renderFavorites(favorites, favSelectedIdx);
       }
       break;
+    case 'a':
+    case 'A':
+      if (currentTrack) {
+        prePlaylistState = 'playing';
+        appState = 'playlist-picker';
+        plPickerIdx = 0;
+        if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
+        renderPlaylistPicker(playlists, plPickerIdx, currentTrack.title);
+      }
+      break;
+    case 'o':
+    case 'O':
+      appState = 'playlist-list';
+      plSelectedIdx = 0;
+      if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
+      renderPlaylistList(playlists, plSelectedIdx);
+      break;
     case 's':
     case 'S':
       goToSearch();
@@ -234,16 +263,119 @@ async function onFavoritesKey(key: string) {
   } else if (key === '\r' || key === '\n') {
     await startPlaying(favorites[favSelectedIdx]);
   } else if (key === 'q' || key === 'Q') {
-    // Return to player if playing, otherwise search
-    if (currentTrack) {
-      appState = 'playing';
-      renderTimer = setInterval(() => {
-        if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id));
-      }, 1000);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+    returnToPlayer();
+  }
+}
+
+// ─── Playlist handlers ──────────────────────────────────────────────────────
+
+function returnToPlayer() {
+  if (currentTrack) {
+    appState = 'playing';
+    renderTimer = setInterval(() => {
+      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id));
+    }, 1000);
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+  } else {
+    goToSearch();
+  }
+}
+
+async function onPlaylistListKey(key: string) {
+  if (key === UP) {
+    plSelectedIdx = Math.max(0, plSelectedIdx - 1);
+    renderPlaylistList(playlists, plSelectedIdx);
+  } else if (key === DOWN) {
+    plSelectedIdx = Math.min(playlists.length - 1, plSelectedIdx + 1);
+    renderPlaylistList(playlists, plSelectedIdx);
+  } else if ((key === '\r' || key === '\n') && playlists.length > 0) {
+    currentPlaylist = playlists[plSelectedIdx]!;
+    appState = 'playlist-detail';
+    plDetailIdx = 0;
+    renderPlaylistDetail(currentPlaylist!, plDetailIdx);
+  } else if (key === 'c' || key === 'C') {
+    prePlaylistState = 'playlist-list';
+    appState = 'new-playlist';
+    newPlaylistName = '';
+    renderNewPlaylistInput(newPlaylistName);
+  } else if ((key === 'd' || key === 'D') && playlists.length > 0) {
+    playlists = deletePlaylist(playlists, playlists[plSelectedIdx]!.id);
+    plSelectedIdx = Math.min(plSelectedIdx, playlists.length - 1);
+    renderPlaylistList(playlists, plSelectedIdx);
+  } else if (key === 'q' || key === 'Q') {
+    returnToPlayer();
+  }
+}
+
+async function onPlaylistDetailKey(key: string) {
+  if (!currentPlaylist) return;
+
+  if (key === UP) {
+    plDetailIdx = Math.max(0, plDetailIdx - 1);
+    renderPlaylistDetail(currentPlaylist, plDetailIdx);
+  } else if (key === DOWN) {
+    plDetailIdx = Math.min(currentPlaylist.tracks.length - 1, plDetailIdx + 1);
+    renderPlaylistDetail(currentPlaylist, plDetailIdx);
+  } else if ((key === '\r' || key === '\n') && currentPlaylist.tracks.length > 0) {
+    await startPlaying(currentPlaylist.tracks[plDetailIdx]);
+  } else if ((key === 'd' || key === 'D') && currentPlaylist.tracks.length > 0) {
+    removeTrackFromPlaylist(playlists, currentPlaylist.id, plDetailIdx);
+    plDetailIdx = Math.min(plDetailIdx, currentPlaylist.tracks.length - 1);
+    renderPlaylistDetail(currentPlaylist, plDetailIdx);
+  } else if (key === 'q' || key === 'Q') {
+    appState = 'playlist-list';
+    renderPlaylistList(playlists, plSelectedIdx);
+  }
+}
+
+async function onPlaylistPickerKey(key: string) {
+  if (key === UP) {
+    plPickerIdx = Math.max(0, plPickerIdx - 1);
+    renderPlaylistPicker(playlists, plPickerIdx, currentTrack?.title || '');
+  } else if (key === DOWN) {
+    plPickerIdx = Math.min(playlists.length - 1, plPickerIdx + 1);
+    renderPlaylistPicker(playlists, plPickerIdx, currentTrack?.title || '');
+  } else if ((key === '\r' || key === '\n') && playlists.length > 0 && currentTrack) {
+    addTrackToPlaylist(playlists, playlists[plPickerIdx]!.id, currentTrack);
+    returnToPlayer();
+  } else if (key === 'c' || key === 'C') {
+    prePlaylistState = 'playlist-picker';
+    appState = 'new-playlist';
+    newPlaylistName = '';
+    renderNewPlaylistInput(newPlaylistName);
+  } else if (key === 'q' || key === 'Q' || key === '\x1B') {
+    returnToPlayer();
+  }
+}
+
+function onNewPlaylistKey(key: string) {
+  if (key === '\x1B') {
+    // Esc - go back
+    if (prePlaylistState === 'playlist-picker') {
+      appState = 'playlist-picker';
+      renderPlaylistPicker(playlists, plPickerIdx, currentTrack?.title || '');
     } else {
-      goToSearch();
+      appState = 'playlist-list';
+      renderPlaylistList(playlists, plSelectedIdx);
     }
+  } else if (key === '\r' || key === '\n') {
+    if (!newPlaylistName.trim()) return;
+    createPlaylist(playlists, newPlaylistName.trim());
+    if (prePlaylistState === 'playlist-picker') {
+      plPickerIdx = playlists.length - 1;
+      appState = 'playlist-picker';
+      renderPlaylistPicker(playlists, plPickerIdx, currentTrack?.title || '');
+    } else {
+      plSelectedIdx = playlists.length - 1;
+      appState = 'playlist-list';
+      renderPlaylistList(playlists, plSelectedIdx);
+    }
+  } else if (key === '\x7F' || key === '\b') {
+    newPlaylistName = newPlaylistName.slice(0, -1);
+    renderNewPlaylistInput(newPlaylistName);
+  } else if (key.length === 1 && key >= ' ') {
+    newPlaylistName += key;
+    renderNewPlaylistInput(newPlaylistName);
   }
 }
 
@@ -273,6 +405,7 @@ async function main() {
 
   await player.start();
   favorites = loadFavorites();
+  playlists = loadPlaylists();
 
   process.stdin.setRawMode(true);
   process.stdin.resume();

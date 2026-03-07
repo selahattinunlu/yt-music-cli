@@ -5,3 +5,10 @@ export interface Track {
   duration?: number;
   uploader?: string;
 }
+
+export interface Playlist {
+  id: string;
+  name: string;
+  tracks: Track[];
+  createdAt: string;
+}

@@ -10,14 +10,14 @@ Kullanicinin kendi playlist'lerini olusturup yonetebilmesi.
 
 ## Kabul Kriterleri
 
-- [ ] Yeni playlist olusturulabilir (isim verilebilir)
-- [ ] Calan sarki bir playlist'e eklenebilir
-- [ ] Playlist listesi gorutulenebilir
-- [ ] Playlist icindeki sarkilar listelenebilir
-- [ ] Playlist'ten sarki calinabilir
-- [ ] Playlist'ten sarki silinebilir
-- [ ] Playlist silinebilir
-- [ ] Veriler `~/.config/yt-music-cli/playlists.json` dosyasina kaydedilir
+- [x] Yeni playlist olusturulabilir (isim verilebilir)
+- [x] Calan sarki bir playlist'e eklenebilir
+- [x] Playlist listesi gorutulenebilir
+- [x] Playlist icindeki sarkilar listelenebilir
+- [x] Playlist'ten sarki calinabilir
+- [x] Playlist'ten sarki silinebilir
+- [x] Playlist silinebilir
+- [x] Veriler `~/.config/yt-music-cli/playlists.json` dosyasina kaydedilir
 
 ## Teknik Notlar
 

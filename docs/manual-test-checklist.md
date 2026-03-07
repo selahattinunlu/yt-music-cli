@@ -67,6 +67,44 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Arama ekraninda favori varsa "L  Favoriler" ipucu gosterilir
 - [ ] Favori listesinden Q ile arama ekranina geri doner (player yoksa)
 
+## Playlistler
+
+### Playlist Olusturma
+- [ ] O ile playlist listesi ekranina gidilir
+- [ ] Playlist listesi bos iken "Henuz playlist yok" mesaji gosterilir
+- [ ] C ile yeni playlist olusturma ekranina gidilir
+- [ ] Isim yazilip Enter ile playlist olusturulur
+- [ ] Esc ile playlist olusturma iptal edilir
+- [ ] Olusturulan playlist listede gosterilir
+
+### Playlist'e Sarki Ekleme
+- [ ] A ile calan sarki icin playlist secici acilir
+- [ ] Playlist secici ekraninda sarkinin adi gosterilir
+- [ ] UP/DOWN ile playlistler arasinda gezinilir
+- [ ] Enter ile secilen playlist'e sarki eklenir
+- [ ] Ayni sarki tekrar eklenmeye calisilirsa eklenmez (duplicate korunma)
+- [ ] C ile playlist secici ekraninda yeni playlist olusturulabilir
+- [ ] Q veya Esc ile playlist secici iptal edilip player'a donulur
+
+### Playlist Goruntuleme
+- [ ] O ile playlist listesi ekranina gidilir
+- [ ] UP/DOWN ile playlistler arasinda gezinilir
+- [ ] Enter ile playlist detayina gidilir
+- [ ] Playlist detayinda sarkilar listelenir
+- [ ] Bos playlist'te "Bu playlist bos" mesaji gosterilir
+- [ ] Playlist detayinda UP/DOWN ile sarkilar arasinda gezinilir
+- [ ] Playlist detayinda Enter ile sarki calinir
+
+### Playlist Silme
+- [ ] Playlist listesinde D ile playlist silinir
+- [ ] Playlist detayinda D ile sarki playlistten silinir
+
+### Playlist Navigasyon
+- [ ] Playlist detayinda Q ile playlist listesine doner
+- [ ] Playlist listesinde Q ile player'a doner (sarki caliyorsa)
+- [ ] Playlist listesinde Q ile arama ekranina doner (sarki calmiyorsa)
+- [ ] Playlistler uygulama kapatilip acildiktan sonra da korunur
+
 ## Genel
 
 - [ ] S ile player'dan arama ekranina doner
