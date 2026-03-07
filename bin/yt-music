@@ -5,11 +5,11 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 const PLATFORMS = {
-  'darwin arm64': 'yt-music-cli-darwin-arm64',
-  'darwin x64':   'yt-music-cli-darwin-x64',
-  'linux x64':    'yt-music-cli-linux-x64',
-  'linux arm64':  'yt-music-cli-linux-arm64',
-  'win32 x64':    'yt-music-cli-win32-x64',
+  'darwin arm64': '@selahattinunlu/yt-music-cli-darwin-arm64',
+  'darwin x64':   '@selahattinunlu/yt-music-cli-darwin-x64',
+  'linux x64':    '@selahattinunlu/yt-music-cli-linux-x64',
+  'linux arm64':  '@selahattinunlu/yt-music-cli-linux-arm64',
+  'win32 x64':    '@selahattinunlu/yt-music-cli-win32-x64',
 };
 
 const key = `${process.platform} ${process.arch}`;

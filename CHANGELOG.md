@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1
+
+### Fixes
+
+- Fix platform package resolution in bin script (use scoped package names)
+
 ## v0.2.0
 
 ### New Features
