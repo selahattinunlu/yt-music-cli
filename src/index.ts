@@ -36,9 +36,8 @@ async function checkDep(cmd: string): Promise<boolean> {
 
 // ─── Player events ─────────────────────────────────────────────────────────
 
-player.on('state', () => {
-  if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, currentTrack ? isFavorite(favorites, currentTrack.id) : false);
-});
+// State updates are handled by player internally.
+// Rendering is driven by the 1-second timer in startPlaying to avoid flicker.
 
 player.on('end-file', async (event: { reason: string }) => {
   // Only auto-advance on natural end (eof), not on manual skip/replace
@@ -91,10 +90,10 @@ async function startPlaying(track: Track) {
   // Refresh display every second for smooth progress bar
   if (renderTimer) clearInterval(renderTimer);
   renderTimer = setInterval(() => {
-    if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, track.id));
+    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
   }, 1000);
 
-  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, track.id));
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
 
   // Fetch mix in background
   fetchMix(track.id, 25)
