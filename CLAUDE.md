@@ -109,3 +109,7 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+
+## Manual Test Checklist
+
+When implementing a new feature or modifying existing behavior, always update `docs/manual-test-checklist.md` with the relevant test cases for that feature.
