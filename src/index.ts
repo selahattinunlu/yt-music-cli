@@ -30,7 +30,17 @@ let currentPlaylist: Playlist | null = null;
 let plPickerIdx = 0;
 let newPlaylistName = '';
 let prePlaylistState: AppState = 'playing';
+let shuffleMode = false;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
+
+function shuffleArray(arr: Track[]) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = arr[i]!;
+    arr[i] = arr[j]!;
+    arr[j] = tmp;
+  }
+}
 
 const player = new Player();
 
@@ -71,6 +81,7 @@ function refillQueue(fromId: string) {
   fetchMix(fromId, 20)
     .then(tracks => {
       const newTracks = tracks.filter(t => t.id !== fromId);
+      if (shuffleMode) shuffleArray(newTracks);
       queue.push(...newTracks);
     })
     .catch(() => {})
@@ -98,15 +109,16 @@ async function startPlaying(track: Track) {
   // Refresh display every second for smooth progress bar
   if (renderTimer) clearInterval(renderTimer);
   renderTimer = setInterval(() => {
-    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
   }, 1000);
 
-  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
 
   // Fetch mix in background
   fetchMix(track.id, 25)
     .then(mixTracks => {
       queue = mixTracks.filter(t => t.id !== track.id).slice(0, 22);
+      if (shuffleMode) shuffleArray(queue);
     })
     .catch(() => {})
     .finally(() => { fetchingMix = false; });
@@ -212,7 +224,7 @@ async function onPlayingKey(key: string) {
       if (currentTrack) {
         const result = toggleFavorite(favorites, currentTrack);
         favorites = result.favorites;
-        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
       }
       break;
     case 'l':
@@ -240,6 +252,12 @@ async function onPlayingKey(key: string) {
       plSelectedIdx = 0;
       if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
       renderPlaylistList(playlists, plSelectedIdx);
+      break;
+    case 'x':
+    case 'X':
+      shuffleMode = !shuffleMode;
+      if (shuffleMode && queue.length > 0) shuffleArray(queue);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode);
       break;
     case 's':
     case 'S':
@@ -273,9 +291,9 @@ function returnToPlayer() {
   if (currentTrack) {
     appState = 'playing';
     renderTimer = setInterval(() => {
-      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id));
+      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode);
     }, 1000);
-    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
   } else {
     goToSearch();
   }

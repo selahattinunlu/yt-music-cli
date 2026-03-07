@@ -105,6 +105,13 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Playlist listesinde Q ile arama ekranina doner (sarki calmiyorsa)
 - [ ] Playlistler uygulama kapatilip acildiktan sonra da korunur
 
+## Shuffle (Karistirma)
+
+- [ ] X ile shuffle modu acilir (ekranda 🔀 ikonu gosterilir)
+- [ ] X ile tekrar basilinca shuffle kapanir (ikon kaybolur)
+- [ ] Shuffle acildiginda mevcut kuyruk karistirilir
+- [ ] Shuffle aktifken yeni mix yuklendiginde de karistirma uygulanir
+
 ## Genel
 
 - [ ] S ile player'dan arama ekranina doner

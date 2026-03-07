@@ -58,10 +58,11 @@ export function renderResults(tracks: Track[], selected: number) {
 
 const CLR = '\x1B[K'; // clear to end of line
 
-export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false) {
+export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false, shuffle = false) {
   const favIcon = favorite ? chalk.red(' ♥') : '';
   const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
-  const status = state.paused ? chalk.yellow('⏸  Duraklatıldı') : chalk.green('▶  Çalıyor');
+  const shuffleIcon = shuffle ? chalk.magenta('  🔀') : '';
+  const status = (state.paused ? chalk.yellow('⏸  Duraklatıldı') : chalk.green('▶  Çalıyor')) + shuffleIcon;
   const progress = bar(state.timePos, state.duration);
   const time = `${fmt(state.timePos)} / ${fmt(state.duration)}`;
 
@@ -91,7 +92,7 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
   }
 
   lines.push(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste'), '');
-  lines.push(chalk.gray('  A Playlist\'e Ekle    O Playlistler    S Arama    Q Çıkış'), '');
+  lines.push(chalk.gray('  A Playlist\'e Ekle    O Playlistler    X Karıştır    S Arama    Q Çıkış'), '');
 
   // Cursor home, overwrite each line with clear-to-end, then clear remaining below
   process.stdout.write('\x1B[H' + lines.map(l => l + CLR).join('\n') + '\x1B[J');

@@ -10,10 +10,10 @@ Kuyruktaki sarkilarin sirasini karistirabilme.
 
 ## Kabul Kriterleri
 
-- [ ] `X` tusu shuffle modunu toggle eder
-- [ ] Shuffle aktifken kuyruk karistirilir
-- [ ] Yeni sarkilar kuyruya eklendikce de karistirma uygulanir
-- [ ] Player ekraninda shuffle durumu gosterilir (acik/kapali)
+- [x] `X` tusu shuffle modunu toggle eder
+- [x] Shuffle aktifken kuyruk karistirilir
+- [x] Yeni sarkilar kuyruya eklendikce de karistirma uygulanir
+- [x] Player ekraninda shuffle durumu gosterilir (acik/kapali)
 
 ## Teknik Notlar
 
