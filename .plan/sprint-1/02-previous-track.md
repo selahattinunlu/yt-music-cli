@@ -10,10 +10,10 @@ Kullanicinin `P` tusuyla bir onceki sarkiya donebilmesi.
 
 ## Kabul Kriterleri
 
-- [ ] `P` tusu onceki sarkiyi calar
-- [ ] Sarki gecmisi (history) tutulur
-- [ ] Gecmis bossa `P` tusu bir sey yapmaz
-- [ ] Onceki sarkiya donunce mevcut sarki gecmisin basina eklenir
+- [x] `P` tusu onceki sarkiyi calar
+- [x] Sarki gecmisi (history) tutulur
+- [x] Gecmis bossa `P` tusu bir sey yapmaz
+- [x] Onceki sarkiya donunce mevcut sarki gecmisin basina eklenir
 
 ## Teknik Notlar
 

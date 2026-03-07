@@ -10,11 +10,11 @@ Kullanicinin begendigi sarkilari kaydedip sonra tekrar erisebilmesi.
 
 ## Kabul Kriterleri
 
-- [ ] `F` tusu calan sarkiyi favorilere ekler/cikarir
-- [ ] Favoriler `~/.config/yt-music-cli/favorites.json` dosyasina kaydedilir
-- [ ] Player ekraninda sarkinin favori olup olmadigi gosterilir
-- [ ] Ana menude veya ozel bir tusla favori listesine erisilebilir
-- [ ] Favori listesinden sarki secilebilir ve calinabilir
+- [x] `F` tusu calan sarkiyi favorilere ekler/cikarir
+- [x] Favoriler `~/.config/yt-music-cli/favorites.json` dosyasina kaydedilir
+- [x] Player ekraninda sarkinin favori olup olmadigi gosterilir
+- [x] Ana menude veya ozel bir tusla favori listesine erisilebilir
+- [x] Favori listesinden sarki secilebilir ve calinabilir
 
 ## Teknik Notlar
 

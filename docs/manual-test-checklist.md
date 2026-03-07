@@ -52,6 +52,17 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Sarki bitince otomatik sonrakine gecer
 - [ ] Queue azalinca yeni mix yuklenir
 
+## Favoriler
+
+- [ ] F ile calan sarki favorilere eklenir (kirmizi kalp gosterilir)
+- [ ] F ile tekrar basilinca favorilerden cikarilir (kalp kaybolur)
+- [ ] L ile favori listesi ekranina gidilir
+- [ ] Favori listesinde UP/DOWN ile gezinilir
+- [ ] Favori listesinde Enter ile sarki calinir
+- [ ] Favori listesinde Q ile player'a geri doner
+- [ ] Favoriler uygulama kapatilip acildiktan sonra da korunur
+- [ ] Favori yokken L bir sey yapmaz
+
 ## Genel
 
 - [ ] S ile player'dan arama ekranina doner

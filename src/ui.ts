@@ -52,10 +52,11 @@ export function renderResults(tracks: Track[], selected: number) {
   console.log(chalk.gray('\n  ↑↓  Gezin    Enter  Seç    Q  Geri\n'));
 }
 
-export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean) {
+export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false) {
   clearScreen();
 
-  const title = clip(state.title || 'Yükleniyor...', 54);
+  const favIcon = favorite ? chalk.red(' ♥') : '';
+  const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
   const status = state.paused ? chalk.yellow('⏸  Duraklatıldı') : chalk.green('▶  Çalıyor');
   const progress = bar(state.timePos, state.duration);
   const time = `${fmt(state.timePos)} / ${fmt(state.duration)}`;
@@ -78,5 +79,32 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
     console.log();
   }
 
-  console.log(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    S Arama    Q Çıkış\n'));
+  console.log(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    S Arama    Q Çıkış\n'));
+}
+
+export function renderFavorites(favorites: Track[], selected: number) {
+  clearScreen();
+  console.log(chalk.cyan.bold('\n  yt-music-cli') + chalk.gray('  ─  Favoriler\n'));
+
+  if (favorites.length === 0) {
+    console.log(chalk.gray('  Henüz favori şarkı yok.\n'));
+    console.log(chalk.gray('  Q  Geri\n'));
+    return;
+  }
+
+  for (let i = 0; i < favorites.length; i++) {
+    const t = favorites[i];
+    const title = clip(t.title, 48);
+    const dur = t.duration ? chalk.gray(` [${fmt(t.duration)}]`) : '';
+    const uploader = t.uploader ? chalk.gray.italic(`  ${clip(t.uploader, 22)}`) : '';
+
+    if (i === selected) {
+      process.stdout.write(chalk.bgCyan.black(`  ♥ ${(i + 1).toString().padStart(2)}. ${title.padEnd(50)}`));
+      console.log(dur);
+    } else {
+      console.log(chalk.red('  ♥ ') + chalk.gray(`${(i + 1).toString().padStart(2)}. `) + chalk.white(title) + dur + uploader);
+    }
+  }
+
+  console.log(chalk.gray('\n  ↑↓  Gezin    Enter  Çal    Q  Geri\n'));
 }

@@ -1,6 +1,7 @@
 import { search, fetchMix } from './search';
 import { Player } from './player';
-import { renderSearch, renderResults, renderPlayer, clearScreen } from './ui';
+import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen } from './ui';
+import { loadFavorites, isFavorite, toggleFavorite } from './config';
 import type { Track } from './types';
 
 // Arrow keys & special keys
@@ -9,7 +10,7 @@ const DOWN = '\x1B[B';
 const LEFT = '\x1B[D';
 const RIGHT = '\x1B[C';
 
-type AppState = 'search-input' | 'search-results' | 'playing';
+type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites';
 
 let appState: AppState = 'search-input';
 let searchQuery = '';
@@ -19,6 +20,8 @@ let queue: Track[] = [];
 let history: Track[] = [];
 let fetchingMix = false;
 let currentTrack: Track | null = null;
+let favorites: Track[] = [];
+let favSelectedIdx = 0;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 const player = new Player();
@@ -34,7 +37,7 @@ async function checkDep(cmd: string): Promise<boolean> {
 // ─── Player events ─────────────────────────────────────────────────────────
 
 player.on('state', () => {
-  if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix);
+  if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, currentTrack ? isFavorite(favorites, currentTrack.id) : false);
 });
 
 player.on('end-file', async (event: { reason: string }) => {
@@ -88,10 +91,10 @@ async function startPlaying(track: Track) {
   // Refresh display every second for smooth progress bar
   if (renderTimer) clearInterval(renderTimer);
   renderTimer = setInterval(() => {
-    if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix);
+    if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, track.id));
   }, 1000);
 
-  renderPlayer(player.state, queue, fetchingMix);
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, track.id));
 
   // Fetch mix in background
   fetchMix(track.id, 25)
@@ -113,6 +116,7 @@ async function handleKey(key: string) {
   if (appState === 'search-input') await onSearchInput(key);
   else if (appState === 'search-results') await onResultsKey(key);
   else if (appState === 'playing') await onPlayingKey(key);
+  else if (appState === 'favorites') await onFavoritesKey(key);
 }
 
 async function onSearchInput(key: string) {
@@ -184,6 +188,23 @@ async function onPlayingKey(key: string) {
     case RIGHT:
       await player.seek(10);
       break;
+    case 'f':
+    case 'F':
+      if (currentTrack) {
+        const result = toggleFavorite(favorites, currentTrack);
+        favorites = result.favorites;
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+      }
+      break;
+    case 'l':
+    case 'L':
+      if (favorites.length > 0) {
+        appState = 'favorites';
+        favSelectedIdx = 0;
+        if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
+        renderFavorites(favorites, favSelectedIdx);
+      }
+      break;
     case 's':
     case 'S':
       goToSearch();
@@ -193,6 +214,29 @@ async function onPlayingKey(key: string) {
       await cleanup();
       process.exit(0);
       break;
+  }
+}
+
+async function onFavoritesKey(key: string) {
+  if (key === UP) {
+    favSelectedIdx = Math.max(0, favSelectedIdx - 1);
+    renderFavorites(favorites, favSelectedIdx);
+  } else if (key === DOWN) {
+    favSelectedIdx = Math.min(favorites.length - 1, favSelectedIdx + 1);
+    renderFavorites(favorites, favSelectedIdx);
+  } else if (key === '\r' || key === '\n') {
+    await startPlaying(favorites[favSelectedIdx]);
+  } else if (key === 'q' || key === 'Q') {
+    // Return to player if playing, otherwise search
+    if (currentTrack) {
+      appState = 'playing';
+      renderTimer = setInterval(() => {
+        if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id));
+      }, 1000);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id));
+    } else {
+      goToSearch();
+    }
   }
 }
 
@@ -221,6 +265,7 @@ async function main() {
   }
 
   await player.start();
+  favorites = loadFavorites();
 
   process.stdin.setRawMode(true);
   process.stdin.resume();
