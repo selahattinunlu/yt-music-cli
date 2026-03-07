@@ -111,6 +111,14 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Degisiklik uygulama kapatilip acildiktan sonra da korunur (playlists.json)
 - [ ] Playlist yokken R bir sey yapmaz
 
+### Playlist Kuyruk Yonetimi
+- [ ] Playlist detayinda bir sarki secildiginde, sonraki playlist sarkilari kuyrukta gosterilir
+- [ ] Kuyrukta once playlist sarkilari calinir
+- [ ] Playlist sarkilari bitince YouTube Mix ile devam edilir
+- [ ] Shuffle aktifken playlist sarkilari da karistirilir
+- [ ] N ile sonraki sarkiya gecildiginde playlist sirasi korunur
+- [ ] Mix'ten gelen sarkilar playlist'teki sarkilarin uzerine yazilmaz
+
 ### Playlist Navigasyon
 - [ ] Playlist detayinda Q ile playlist listesine doner
 - [ ] Playlist listesinde Q ile player'a doner (sarki caliyorsa)

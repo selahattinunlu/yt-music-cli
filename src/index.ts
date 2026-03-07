@@ -80,9 +80,10 @@ player.on('end-file', async (event: { reason: string }) => {
 
 function refillQueue(fromId: string) {
   fetchingMix = true;
+  const existingIds = new Set(queue.map(t => t.id));
   fetchMix(fromId, 20)
     .then(tracks => {
-      const newTracks = tracks.filter(t => t.id !== fromId);
+      const newTracks = tracks.filter(t => t.id !== fromId && !existingIds.has(t.id));
       if (shuffleMode) shuffleArray(newTracks);
       queue.push(...newTracks);
     })
@@ -99,11 +100,10 @@ function goToSearch() {
   renderSearch('', '', favorites.length > 0, playlists.length > 0);
 }
 
-async function startPlaying(track: Track) {
+async function startPlaying(track: Track, remainingTracks?: Track[]) {
   appState = 'playing';
   if (currentTrack) history.push(currentTrack);
   queue = [];
-  fetchingMix = true;
   currentTrack = track;
 
   await player.loadTrack(track.url);
@@ -114,16 +114,23 @@ async function startPlaying(track: Track) {
     if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
   }, 1000);
 
-  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
+  if (remainingTracks && remainingTracks.length > 0) {
+    queue = [...remainingTracks];
+    if (shuffleMode) shuffleArray(queue);
+    fetchingMix = false;
+  } else {
+    // Fetch mix in background
+    fetchingMix = true;
+    fetchMix(track.id, 25)
+      .then(mixTracks => {
+        queue = mixTracks.filter(t => t.id !== track.id).slice(0, 22);
+        if (shuffleMode) shuffleArray(queue);
+      })
+      .catch(() => {})
+      .finally(() => { fetchingMix = false; });
+  }
 
-  // Fetch mix in background
-  fetchMix(track.id, 25)
-    .then(mixTracks => {
-      queue = mixTracks.filter(t => t.id !== track.id).slice(0, 22);
-      if (shuffleMode) shuffleArray(queue);
-    })
-    .catch(() => {})
-    .finally(() => { fetchingMix = false; });
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
 }
 
 // ─── Key handlers ───────────────────────────────────────────────────────────
@@ -352,7 +359,9 @@ async function onPlaylistDetailKey(key: string) {
     plDetailIdx = Math.min(currentPlaylist.tracks.length - 1, plDetailIdx + 1);
     renderPlaylistDetail(currentPlaylist, plDetailIdx);
   } else if ((key === '\r' || key === '\n') && currentPlaylist.tracks.length > 0) {
-    await startPlaying(currentPlaylist.tracks[plDetailIdx]);
+    const after = currentPlaylist.tracks.slice(plDetailIdx + 1);
+    const before = currentPlaylist.tracks.slice(0, plDetailIdx);
+    await startPlaying(currentPlaylist.tracks[plDetailIdx], [...after, ...before]);
   } else if ((key === 'd' || key === 'D') && currentPlaylist.tracks.length > 0) {
     removeTrackFromPlaylist(playlists, currentPlaylist.id, plDetailIdx);
     plDetailIdx = Math.min(plDetailIdx, currentPlaylist.tracks.length - 1);
