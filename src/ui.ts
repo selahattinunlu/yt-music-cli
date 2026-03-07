@@ -24,27 +24,20 @@ export function clearScreen() {
   process.stdout.write('\x1B[H\x1B[2J');
 }
 
-function cursorHome() {
-  process.stdout.write('\x1B[H');
-}
-
-function clearBelow() {
-  process.stdout.write('\x1B[J');
-}
-
 export function renderSearch(query: string, hint = '', hasFavorites = false) {
-  clearScreen();
-  console.log(chalk.cyan.bold('\n  yt-music-cli\n'));
-  if (hint) console.log(chalk.gray(`  ${hint}\n`));
-  process.stdout.write(chalk.white('  Search: ') + chalk.white.bold(query) + chalk.gray(' █'));
+  let out = '\x1B[H\x1B[2J';
+  out += chalk.cyan.bold('\n  yt-music-cli\n') + '\n';
+  if (hint) out += chalk.gray(`  ${hint}\n`) + '\n';
+  out += chalk.white('  Search: ') + chalk.white.bold(query) + chalk.gray(' █');
   if (hasFavorites && !query) {
-    console.log(chalk.gray('\n\n  L  Favoriler'));
+    out += chalk.gray('\n\n  L  Favoriler');
   }
+  process.stdout.write(out);
 }
 
 export function renderResults(tracks: Track[], selected: number) {
-  clearScreen();
-  console.log(chalk.cyan.bold('\n  yt-music-cli') + chalk.gray('  ─  Arama Sonuçları\n'));
+  let out = '\x1B[H\x1B[2J';
+  out += chalk.cyan.bold('\n  yt-music-cli') + chalk.gray('  ─  Arama Sonuçları\n') + '\n';
 
   for (let i = 0; i < tracks.length; i++) {
     const t = tracks[i];
@@ -53,54 +46,54 @@ export function renderResults(tracks: Track[], selected: number) {
     const uploader = t.uploader ? chalk.gray.italic(`  ${clip(t.uploader, 22)}`) : '';
 
     if (i === selected) {
-      process.stdout.write(chalk.bgCyan.black(`  ▶ ${(i + 1).toString().padStart(2)}. ${title.padEnd(50)}`));
-      console.log(dur);
+      out += chalk.bgCyan.black(`  ▶ ${(i + 1).toString().padStart(2)}. ${title.padEnd(50)}`) + dur + '\n';
     } else {
-      console.log(chalk.gray(`  ${(i + 1).toString().padStart(2)}. `) + chalk.white(title) + dur + uploader);
+      out += chalk.gray(`  ${(i + 1).toString().padStart(2)}. `) + chalk.white(title) + dur + uploader + '\n';
     }
   }
 
-  console.log(chalk.gray('\n  ↑↓  Gezin    Enter  Seç    Q  Geri\n'));
+  out += chalk.gray('\n  ↑↓  Gezin    Enter  Seç    Q  Geri\n') + '\n';
+  process.stdout.write(out);
 }
 
 export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false) {
-  cursorHome();
-
   const favIcon = favorite ? chalk.red(' ♥') : '';
   const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
   const status = state.paused ? chalk.yellow('⏸  Duraklatıldı') : chalk.green('▶  Çalıyor');
   const progress = bar(state.timePos, state.duration);
   const time = `${fmt(state.timePos)} / ${fmt(state.duration)}`;
 
-  console.log(chalk.cyan.bold('\n  yt-music-cli\n'));
-  console.log(`  ${status}`);
-  console.log(`\n  ${chalk.white.bold(title)}\n`);
-  console.log(`  ${progress}  ${chalk.gray(time)}\n`);
+  let out = '\x1B[H\x1B[2J';
+  out += chalk.cyan.bold('\n  yt-music-cli\n') + '\n';
+  out += `  ${status}\n`;
+  out += `\n  ${chalk.white.bold(title)}\n` + '\n';
+  out += `  ${progress}  ${chalk.gray(time)}\n` + '\n';
 
   if (fetchingMix && queue.length === 0) {
-    console.log(chalk.gray('  Mix yükleniyor...\n'));
+    out += chalk.gray('  Mix yükleniyor...\n') + '\n';
   } else if (queue.length > 0) {
-    console.log(chalk.gray('  Sırada:'));
+    out += chalk.gray('  Sırada:') + '\n';
     for (let i = 0; i < Math.min(queue.length, 4); i++) {
-      console.log(chalk.gray(`    ${i + 1}. ${clip(queue[i].title, 52)}`));
+      out += chalk.gray(`    ${i + 1}. ${clip(queue[i].title, 52)}`) + '\n';
     }
     if (queue.length > 4) {
-      console.log(chalk.gray(`    +${queue.length - 4} şarkı daha`));
+      out += chalk.gray(`    +${queue.length - 4} şarkı daha`) + '\n';
     }
-    console.log();
+    out += '\n';
   }
 
-  console.log(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    S Arama    Q Çıkış\n'));
-  clearBelow();
+  out += chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    S Arama    Q Çıkış\n') + '\n';
+  process.stdout.write(out);
 }
 
 export function renderFavorites(favorites: Track[], selected: number) {
-  clearScreen();
-  console.log(chalk.cyan.bold('\n  yt-music-cli') + chalk.gray('  ─  Favoriler\n'));
+  let out = '\x1B[H\x1B[2J';
+  out += chalk.cyan.bold('\n  yt-music-cli') + chalk.gray('  ─  Favoriler\n') + '\n';
 
   if (favorites.length === 0) {
-    console.log(chalk.gray('  Henüz favori şarkı yok.\n'));
-    console.log(chalk.gray('  Q  Geri\n'));
+    out += chalk.gray('  Henüz favori şarkı yok.\n') + '\n';
+    out += chalk.gray('  Q  Geri\n') + '\n';
+    process.stdout.write(out);
     return;
   }
 
@@ -111,12 +104,12 @@ export function renderFavorites(favorites: Track[], selected: number) {
     const uploader = t.uploader ? chalk.gray.italic(`  ${clip(t.uploader, 22)}`) : '';
 
     if (i === selected) {
-      process.stdout.write(chalk.bgCyan.black(`  ♥ ${(i + 1).toString().padStart(2)}. ${title.padEnd(50)}`));
-      console.log(dur);
+      out += chalk.bgCyan.black(`  ♥ ${(i + 1).toString().padStart(2)}. ${title.padEnd(50)}`) + dur + '\n';
     } else {
-      console.log(chalk.red('  ♥ ') + chalk.gray(`${(i + 1).toString().padStart(2)}. `) + chalk.white(title) + dur + uploader);
+      out += chalk.red('  ♥ ') + chalk.gray(`${(i + 1).toString().padStart(2)}. `) + chalk.white(title) + dur + uploader + '\n';
     }
   }
 
-  console.log(chalk.gray('\n  ↑↓  Gezin    Enter  Çal    Q  Geri\n'));
+  out += chalk.gray('\n  ↑↓  Gezin    Enter  Çal    Q  Geri\n') + '\n';
+  process.stdout.write(out);
 }

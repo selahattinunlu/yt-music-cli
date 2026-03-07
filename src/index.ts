@@ -86,7 +86,6 @@ async function startPlaying(track: Track) {
   fetchingMix = true;
   currentTrack = track;
 
-  clearScreen();
   await player.loadTrack(track.url);
 
   // Refresh display every second for smooth progress bar
