@@ -14,11 +14,9 @@ Player ekrani her saniye yenilenirken ekranda titreme oluyor. Yazilar anlik kayb
 
 ## Cozum
 
-`\x1Bc` yerine:
-- `\x1B[H` ile cursor'u ekranin basina tasi
-- Icerik yazildiktan sonra `\x1B[J` ile kalan alani temizle
-
-Boylece ekran sifirlanmadan mevcut icerik uzerine yazilir ve titreme olmaz.
+1. Tum render fonksiyonlari tek bir `process.stdout.write()` cagrisina donusturuldu (atomic write)
+2. `renderPlayer` icin `\x1B[H` (cursor home) + satir bazli `\x1B[K` (clear to EOL) + `\x1B[J` (clear below) kullanildi
+3. `player.on('state')` event'inden render cagrisi kaldirildi — render sadece 1sn timer ile yapiliyor
 
 ## Kabul Kriterleri
 
