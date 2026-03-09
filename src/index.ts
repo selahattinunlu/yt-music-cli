@@ -14,6 +14,7 @@ const RIGHT = '\x1B[C';
 type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites' | 'playlist-list' | 'playlist-detail' | 'playlist-picker' | 'new-playlist' | 'rename-playlist';
 
 let appState: AppState = 'search-input';
+let searchMode: 'typing' | 'command' = 'typing';
 let searchQuery = '';
 let results: Track[] = [];
 let selectedIdx = 0;
@@ -33,6 +34,7 @@ let renamePlaylistName = '';
 let renamingPlaylistId = '';
 let prePlaylistState: AppState = 'playing';
 let shuffleMode = false;
+let volume = 100;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 function shuffleArray(arr: Track[]) {
@@ -96,8 +98,9 @@ function refillQueue(fromId: string) {
 function goToSearch() {
   appState = 'search-input';
   searchQuery = '';
+  searchMode = 'typing';
   if (renderTimer) { clearInterval(renderTimer); renderTimer = null; }
-  renderSearch('', '', favorites.length > 0, playlists.length > 0);
+  renderSearch('', '', favorites.length > 0, playlists.length > 0, searchMode);
 }
 
 async function startPlaying(track: Track, remainingTracks?: Track[]) {
@@ -111,7 +114,7 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
   // Refresh display every second for smooth progress bar
   if (renderTimer) clearInterval(renderTimer);
   renderTimer = setInterval(() => {
-    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
+    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
   }, 1000);
 
   if (remainingTracks && remainingTracks.length > 0) {
@@ -130,7 +133,7 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
       .finally(() => { fetchingMix = false; });
   }
 
-  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
 }
 
 // ─── Key handlers ───────────────────────────────────────────────────────────
@@ -153,43 +156,68 @@ async function handleKey(key: string) {
 }
 
 async function onSearchInput(key: string) {
-  if ((key === 'l' || key === 'L') && !searchQuery) {
-    if (favorites.length > 0) {
-      appState = 'favorites';
-      favSelectedIdx = 0;
-      renderFavorites(favorites, favSelectedIdx);
+  // Command mode: shortcuts active, any character key returns to typing mode
+  if (searchMode === 'command') {
+    if (key === '\x1B') {
+      // Stay in command mode on Escape
+      return;
+    }
+    // Handle L (favorites) shortcut
+    if ((key === 'l' || key === 'L') && !searchQuery) {
+      if (favorites.length > 0) {
+        appState = 'favorites';
+        favSelectedIdx = 0;
+        renderFavorites(favorites, favSelectedIdx);
+      }
+      return;
+    }
+    // Handle O (playlist) shortcut
+    if ((key === 'o' || key === 'O') && !searchQuery) {
+      if (playlists.length > 0) {
+        appState = 'playlist-list';
+        plSelectedIdx = 0;
+        renderPlaylistList(playlists, plSelectedIdx);
+      }
+      return;
+    }
+    // Any character key switches back to typing mode
+    if (key.length === 1 && key >= ' ') {
+      searchMode = 'typing';
+      searchQuery += key;
+      renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0, searchMode);
+      return;
     }
     return;
   }
-  if ((key === 'o' || key === 'O') && !searchQuery) {
-    if (playlists.length > 0) {
-      appState = 'playlist-list';
-      plSelectedIdx = 0;
-      renderPlaylistList(playlists, plSelectedIdx);
-    }
+
+  // Typing mode: Escape switches to command mode
+  if (key === '\x1B') {
+    searchMode = 'command';
+    searchQuery = '';
+    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0, searchMode);
     return;
   }
   if (key === '\r' || key === '\n') {
     if (!searchQuery.trim()) return;
-    renderSearch('Aranıyor...', `"${searchQuery}"`);
+    renderSearch('Aranıyor...', `"${searchQuery}"`, favorites.length > 0, playlists.length > 0, searchMode);
     try {
       results = await search(searchQuery);
       if (results.length === 0) {
-        renderSearch('', 'Sonuç bulunamadı. Tekrar dene.', favorites.length > 0, playlists.length > 0);
+        renderSearch('', 'Sonuç bulunamadı. Tekrar dene.', favorites.length > 0, playlists.length > 0, searchMode);
         return;
       }
       appState = 'search-results';
       selectedIdx = 0;
       renderResults(results, selectedIdx);
     } catch {
-      renderSearch('', 'Hata oluştu. yt-dlp kurulu olduğundan emin ol.', favorites.length > 0, playlists.length > 0);
+      renderSearch('', 'Hata oluştu. yt-dlp kurulu olduğundan emin ol.', favorites.length > 0, playlists.length > 0, searchMode);
     }
   } else if (key === '\x7F' || key === '\b') {
     searchQuery = searchQuery.slice(0, -1);
-    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0);
+    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0, searchMode);
   } else if (key.length === 1 && key >= ' ') {
     searchQuery += key;
-    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0);
+    renderSearch(searchQuery, '', favorites.length > 0, playlists.length > 0, searchMode);
   }
 }
 
@@ -242,7 +270,7 @@ async function onPlayingKey(key: string) {
       if (currentTrack) {
         const result = toggleFavorite(favorites, currentTrack);
         favorites = result.favorites;
-        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
       }
       break;
     case 'l':
@@ -275,11 +303,23 @@ async function onPlayingKey(key: string) {
     case 'X':
       shuffleMode = !shuffleMode;
       if (shuffleMode && queue.length > 0) shuffleArray(queue);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
       break;
     case 's':
     case 'S':
       goToSearch();
+      break;
+    case '+':
+    case '=':
+      volume = Math.min(100, volume + 10);
+      await player.setVolume(volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      break;
+    case '-':
+    case '_':
+      volume = Math.max(0, volume - 10);
+      await player.setVolume(volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
       break;
     case 'q':
     case 'Q':
@@ -309,9 +349,9 @@ function returnToPlayer() {
   if (currentTrack) {
     appState = 'playing';
     renderTimer = setInterval(() => {
-      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode);
+      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
     }, 1000);
-    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode);
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
   } else {
     goToSearch();
   }

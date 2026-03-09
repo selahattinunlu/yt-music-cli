@@ -24,15 +24,21 @@ export function clearScreen() {
   process.stdout.write('\x1B[H\x1B[2J');
 }
 
-export function renderSearch(query: string, hint = '', hasFavorites = false, hasPlaylists = false) {
+export function renderSearch(query: string, hint = '', hasFavorites = false, hasPlaylists = false, searchMode: 'typing' | 'command' = 'typing') {
   let out = '\x1B[H\x1B[2J';
-  out += chalk.cyan.bold('\n  yt-music-cli\n') + '\n';
+  out += chalk.cyan.bold('\n  yt-music-cli') + '\n';
   if (hint) out += chalk.gray(`  ${hint}\n`) + '\n';
-  out += chalk.white('  Search: ') + chalk.white.bold(query) + chalk.gray(' █');
+  
+  const modeIndicator = searchMode === 'command' ? chalk.yellow(' [KOMUT]') : chalk.gray(' [YAZIYOR]');
+  out += chalk.white('  Search:') + modeIndicator + ' ' + chalk.white.bold(query) + chalk.gray(' █');
   if (!query && (hasFavorites || hasPlaylists)) {
     out += '\n';
-    if (hasFavorites) out += chalk.gray('\n  L  Favoriler');
-    if (hasPlaylists) out += chalk.gray('\n  O  Playlistler');
+    if (searchMode === 'command') {
+      if (hasFavorites) out += chalk.gray('\n  L  Favoriler');
+      if (hasPlaylists) out += chalk.gray('\n  O  Playlistler');
+    } else {
+      out += chalk.gray('\n  (Favori/Playlist\'e erişmek için Esc tuşuna bas)');
+    }
   }
   process.stdout.write(out);
 }
@@ -60,11 +66,12 @@ export function renderResults(tracks: Track[], selected: number) {
 
 const CLR = '\x1B[K'; // clear to end of line
 
-export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false, shuffle = false) {
+export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false, shuffle = false, volume = 100) {
   const favIcon = favorite ? chalk.red(' ♥') : '';
   const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
   const shuffleIcon = shuffle ? chalk.magenta('  🔀') : '';
-  const status = (state.paused ? chalk.yellow('⏸  Duraklatıldı') : chalk.green('▶  Çalıyor')) + shuffleIcon;
+  const volumeIcon = chalk.yellow(` 🔊 ${volume}%`);
+  const status = (state.paused ? chalk.yellow('⏸  Duraklatıldı') : chalk.green('▶  Çalıyor')) + shuffleIcon + volumeIcon;
   const progress = bar(state.timePos, state.duration);
   const time = `${fmt(state.timePos)} / ${fmt(state.duration)}`;
 
@@ -93,7 +100,7 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
     lines.push('');
   }
 
-  lines.push(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste'), '');
+  lines.push(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    +/- Ses'), '');
   lines.push(chalk.gray('  A Playlist\'e Ekle    O Playlistler    X Karıştır    S Arama    Q Çıkış'), '');
 
   // Cursor home, overwrite each line with clear-to-end, then clear remaining below

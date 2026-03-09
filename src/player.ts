@@ -9,6 +9,7 @@ export interface PlayerState {
   paused: boolean;
   timePos: number;
   duration: number;
+  volume: number;
 }
 
 export class Player extends EventEmitter {
@@ -23,6 +24,7 @@ export class Player extends EventEmitter {
     paused: false,
     timePos: 0,
     duration: 0,
+    volume: 100,
   };
 
   async start() {
@@ -62,6 +64,7 @@ export class Player extends EventEmitter {
     await this.send('observe_property', 2, 'pause');
     await this.send('observe_property', 3, 'time-pos');
     await this.send('observe_property', 4, 'duration');
+    await this.send('observe_property', 5, 'volume');
   }
 
   private onData(data: string) {
@@ -97,6 +100,7 @@ export class Player extends EventEmitter {
       case 'pause': this.state.paused = value; break;
       case 'time-pos': this.state.timePos = value; break;
       case 'duration': this.state.duration = value; break;
+      case 'volume': this.state.volume = Math.round(value); break;
     }
     this.emit('state');
   }
@@ -120,5 +124,15 @@ export class Player extends EventEmitter {
     try { await this.send('quit'); } catch {}
     this.socket?.destroy();
     this.proc?.kill();
+  }
+
+  async setVolume(level: number) {
+    const clamped = Math.max(0, Math.min(100, level));
+    await this.send('set_property', 'volume', clamped);
+  }
+
+  async getVolume() {
+    const result = await this.send('get_property', 'volume');
+    return result?.data ?? 100;
   }
 }
