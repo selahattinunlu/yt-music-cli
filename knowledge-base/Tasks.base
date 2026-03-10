@@ -1,0 +1,55 @@
+filters:
+  and:
+    - file.hasTag("task")
+    - file.ext == "md"
+formulas:
+  status_icon: if(status == "completed", "✅", if(status == "partial", "🔶", if(status == "duplicate", "❌", "⏳")))
+  priority_badge: if(priority == "P0", "🔴 P0", if(priority == "P1", "🟡 P1", "🟢 P2"))
+properties:
+  status:
+    displayName: Status
+  formula.priority_badge:
+    displayName: Priority
+views:
+  - type: table
+    name: All Tasks
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - formula.status_icon
+      - status
+      - formula.priority_badge
+      - effort
+      - area
+  - type: table
+    name: Backlog
+    filters:
+      and:
+        - status == "planned"
+    groupBy:
+      property: priority
+      direction: ASC
+    order:
+      - file.name
+      - formula.priority_badge
+      - effort
+      - user_value
+      - area
+  - type: table
+    name: In Progress
+    filters:
+      and:
+        - status == "partial"
+    order:
+      - file.name
+      - area
+  - type: table
+    name: Completed
+    filters:
+      and:
+        - status == "completed"
+    order:
+      - file.name
+      - area

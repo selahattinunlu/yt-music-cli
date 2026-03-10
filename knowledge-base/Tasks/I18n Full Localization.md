@@ -34,6 +34,4 @@ Uygulama arayuzunun birden fazla dili desteklemesi; tum UI metinlerinin merkezil
 - Sistem dili `Intl.DateTimeFormat().resolvedOptions().locale` veya `process.env.LANG` ile alinabilir
 - Kullanici tercihi `~/.config/yt-music-cli/config.json` icinde saklanabilir
 
-## Related
 
-- Daha erken ve daha dar kapsamli versiyon: [[I18n Foundation]]
