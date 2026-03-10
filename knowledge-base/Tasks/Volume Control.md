@@ -4,7 +4,7 @@ tags:
   - kb
   - task
 task_id: TASK-011
-status: partial
+status: completed
 priority: P0
 effort: S
 user_value: 9
@@ -23,8 +23,8 @@ Kullanicinin `+` ve `-` tuslariyla ses seviyesini artirip azaltabilmesi.
 
 ## Acceptance Criteria
 
-- [ ] `+` tusu ses seviyesini 5 birim arttirir
-- [ ] `-` tusu ses seviyesini 5 birim azaltir
+- [x] `+` tusu ses seviyesini 5 birim arttirir
+- [x] `-` tusu ses seviyesini 5 birim azaltir
 - [x] Mevcut ses seviyesi player ekraninda gosterilir
 - [x] Ses seviyesi 0-100 araliginda sinirlandirilir
 

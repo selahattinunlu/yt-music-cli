@@ -10,6 +10,7 @@ const UP = '\x1B[A';
 const DOWN = '\x1B[B';
 const LEFT = '\x1B[D';
 const RIGHT = '\x1B[C';
+const VOLUME_STEP = 5;
 
 type AppState = 'search-input' | 'search-results' | 'playing' | 'favorites' | 'playlist-list' | 'playlist-detail' | 'playlist-picker' | 'new-playlist' | 'rename-playlist';
 
@@ -311,13 +312,13 @@ async function onPlayingKey(key: string) {
       break;
     case '+':
     case '=':
-      volume = Math.min(100, volume + 10);
+      volume = Math.min(100, volume + VOLUME_STEP);
       await player.setVolume(volume);
       renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
       break;
     case '-':
     case '_':
-      volume = Math.max(0, volume - 10);
+      volume = Math.max(0, volume - VOLUME_STEP);
       await player.setVolume(volume);
       renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
       break;
