@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.0
+
+### New Features
+
+- **Volume Control** — Press `+`/`=` to increase, `-`/`_` to decrease volume by 5 units. Current volume is displayed on the player screen.
+
+### Fixes
+
+- Fix search input hotkey handling on search screen
+
 ## v0.2.1
 
 ### Fixes
