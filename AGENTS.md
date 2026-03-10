@@ -47,4 +47,5 @@ bun test                # Run tests
 ## Testing & Releasing
 
 - **Manual Testing**: Before release, run through `knowledge-base/Manual Test Checklist.md` in Obsidian
+- **Updating Tests**: When adding a new feature or modifying existing behavior, update the checklist accordingly
 - **Releasing**: Follow the guide in `knowledge-base/Releasing.md` for version bumping and publishing
