@@ -4,21 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "29c1c80927653aa2",
+        "id": "ab61cafa83a707b0",
         "type": "tabs",
         "children": [
           {
-            "id": "0ba836b0d1c7469c",
+            "id": "cdc8cde94346840a",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "Tasks/Add To Queue.md",
-                "mode": "source",
-                "source": false
+                "file": "Tasks.base",
+                "viewName": "All Tasks"
               },
-              "icon": "lucide-file",
-              "title": "Add To Queue"
+              "icon": "lucide-table",
+              "title": "Tasks"
             }
           }
         ]
@@ -183,13 +182,20 @@
       "bases:Create new base": false
     }
   },
-  "active": "0ba836b0d1c7469c",
+  "active": "cdc8cde94346840a",
   "lastOpenFiles": [
-    "Tasks/Volume Control.md",
-    "Tasks.base",
     "Tasks/I18n Full Localization.md",
-    "Tasks/Repeat Mode.md",
+    "Tasks.base",
     "Roadmap.md",
+    "Runtime Flow.md",
+    "Home.md",
+    "Product Overview.md",
+    "Data Model.md",
+    "Development Workflow.md",
+    "Architecture.md",
+    "Tasks/Volume Control.md",
+    "Tasks/Add To Queue.md",
+    "Tasks/Repeat Mode.md",
     "Issues.base",
     "Tasks/Terminal Title.md",
     "Tasks/Search Screen Back.md",
@@ -199,19 +205,12 @@
     "Tasks/I18n Foundation.md",
     "Tasks/Auto Resume On Search Play.md",
     "Tasks/Config File.md",
-    "Tasks/Add To Queue.md",
     "Tasks",
     "Issues/Search History.md",
     "Issues/Search Filters.md",
     "Issues/Repeat Mode.md",
     "Issues/Config File.md",
     "Issues/Auto Resume On Search Play.md",
-    "Issues/Add To Queue.md",
-    "Home.md",
-    "Product Overview.md",
-    "Data Model.md",
-    "Runtime Flow.md",
-    "Issues.md",
-    "Architecture.md"
+    "Issues/Add To Queue.md"
   ]
 }
