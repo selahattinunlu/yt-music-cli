@@ -1,3 +1,10 @@
+---
+title: Releasing a New Version
+tags:
+  - kb
+  - devops
+---
+
 # Releasing a New Version
 
 ## Overview

@@ -1,3 +1,10 @@
+---
+title: Manuel Test Checklist
+tags:
+  - kb
+  - testing
+---
+
 # Manuel Test Checklist
 
 Her release oncesi bu listeyi kontrol et.
@@ -131,6 +138,13 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] X ile tekrar basilinca shuffle kapanir (ikon kaybolur)
 - [ ] Shuffle acildiginda mevcut kuyruk karistirilir
 - [ ] Shuffle aktifken yeni mix yuklendiginde de karistirma uygulanir
+
+## Volume Control
+
+- [ ] + veya = ile ses seviyesi 5 birim artar
+- [ ] - veya _ ile ses seviyesi 5 birim azalir
+- [ ] Ses seviyesi 0-100 araliginda sinirli kalir
+- [ ] Mevcut ses seviyesi player ekraninda gosterilir
 
 ## Genel
 

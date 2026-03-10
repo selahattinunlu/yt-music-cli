@@ -112,4 +112,4 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 
 ## Manual Test Checklist
 
-When implementing a new feature or modifying existing behavior, always update `docs/manual-test-checklist.md` with the relevant test cases for that feature.
+When implementing a new feature or modifying existing behavior, always update `knowledge-base/Manual Test Checklist.md` with the relevant test cases for that feature.

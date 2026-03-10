@@ -47,7 +47,7 @@ Bu vault, `yt-music-cli` projesinin urun, mimari, akis ve operasyon bilgisini te
 
 - README: `README.md`
 - Release notlari: `CHANGELOG.md`
-- Release akisi: `docs/releasing.md`
-- Manuel testler: `docs/manual-test-checklist.md`
-- Task tracker: `knowledge-base/Tasks.base`
+- Release akisi: [[Releasing]]
+- Manuel testler: [[Manual Test Checklist]]
+- Task tracker: `Tasks.base`
 - Tarihsel kaynak path'ler task notlarindaki `source_path` alaninda tutuluyor
