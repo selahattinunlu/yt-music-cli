@@ -12,6 +12,8 @@ This project uses **Obsidian** as a knowledge base in `knowledge-base/`. Open it
 | `knowledge-base/Roadmap.md` | Sprint planning overview |
 | `knowledge-base/Tasks.base` | Task tracking views (open in Obsidian) |
 | `knowledge-base/Tasks/*.md` | Individual task notes |
+| `knowledge-base/Manual Test Checklist.md` | Pre-release test checklist |
+| `knowledge-base/Releasing.md` | Release workflow guide |
 
 ### Task Tracking
 
@@ -41,3 +43,8 @@ Open `knowledge-base/Tasks.base` in Obsidian to see task views: All Tasks, Backl
 bun run src/index.ts    # Run the app
 bun test                # Run tests
 ```
+
+## Testing & Releasing
+
+- **Manual Testing**: Before release, run through `knowledge-base/Manual Test Checklist.md` in Obsidian
+- **Releasing**: Follow the guide in `knowledge-base/Releasing.md` for version bumping and publishing
