@@ -14,8 +14,7 @@ brew install mpv yt-dlp
 
 **Linux (Debian/Ubuntu)**
 ```sh
-sudo apt install mpv
-pip install yt-dlp
+sudo apt install mpv yt-dlp
 ```
 
 **Windows**
