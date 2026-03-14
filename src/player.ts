@@ -1,9 +1,14 @@
-import { createConnection, type Socket } from 'net';
-import { EventEmitter } from 'events';
-import { existsSync } from 'fs';
+import { createConnection, type Socket } from "net";
+import { EventEmitter } from "events";
+import { existsSync } from "fs";
+import os from "node:os";
+import path from "node:path";
 
-const SOCKET = '/tmp/yt-music-mpv.sock';
-
+const tempDir = os.tmpdir();
+const SOCKET =
+  process.platform === "win32"
+    ? "\\\\.\\pipe\\yt-music-mpv"
+    : path.join(os.tmpdir(), "yt-music-mpv.sock");
 export interface PlayerState {
   title: string;
   paused: boolean;
@@ -15,12 +20,12 @@ export interface PlayerState {
 export class Player extends EventEmitter {
   private proc: ReturnType<typeof Bun.spawn> | null = null;
   private socket: Socket | null = null;
-  private buf = '';
+  private buf = "";
   private reqId = 0;
   private pending = new Map<number, (r: any) => void>();
 
   state: PlayerState = {
-    title: '',
+    title: "",
     paused: false,
     timePos: 0,
     duration: 0,
@@ -28,11 +33,21 @@ export class Player extends EventEmitter {
   };
 
   async start() {
-    await Bun.$`rm -f ${SOCKET}`.quiet();
+    if (process.platform !== "win32" && existsSync(SOCKET)) {
+      try {
+        await Bun.$`rm ${SOCKET}`.quiet();
+      } catch (e) {}
+    }
 
     this.proc = Bun.spawn(
-      ['mpv', '--no-video', '--no-terminal', `--input-ipc-server=${SOCKET}`, '--idle=yes'],
-      { stderr: 'ignore', stdout: 'ignore' }
+      [
+        "mpv",
+        "--no-video",
+        "--no-terminal",
+        `--input-ipc-server=${SOCKET}`,
+        "--idle=yes",
+      ],
+      { stderr: "ignore", stdout: "ignore" },
     );
 
     await this.waitForSocket();
@@ -41,10 +56,14 @@ export class Player extends EventEmitter {
   }
 
   private async waitForSocket(timeout = 5000): Promise<void> {
+    if (process.platform === "win32") {
+      await Bun.sleep(500);
+      return;
+    }
+
     const deadline = Date.now() + timeout;
     while (Date.now() < deadline) {
-      const exists = existsSync(SOCKET);
-      if (exists) return;
+      if (existsSync(SOCKET)) return;
       await Bun.sleep(50);
     }
     throw new Error(`mpv socket did not appear within ${timeout}ms: ${SOCKET}`);
@@ -53,24 +72,24 @@ export class Player extends EventEmitter {
   private connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.socket = createConnection(SOCKET)
-        .on('connect', resolve)
-        .on('error', reject)
-        .on('data', (d) => this.onData(d.toString()));
+        .on("connect", resolve)
+        .on("error", reject)
+        .on("data", (d) => this.onData(d.toString()));
     });
   }
 
   private async observe() {
-    await this.send('observe_property', 1, 'media-title');
-    await this.send('observe_property', 2, 'pause');
-    await this.send('observe_property', 3, 'time-pos');
-    await this.send('observe_property', 4, 'duration');
-    await this.send('observe_property', 5, 'volume');
+    await this.send("observe_property", 1, "media-title");
+    await this.send("observe_property", 2, "pause");
+    await this.send("observe_property", 3, "time-pos");
+    await this.send("observe_property", 4, "duration");
+    await this.send("observe_property", 5, "volume");
   }
 
   private onData(data: string) {
     this.buf += data;
-    const lines = this.buf.split('\n');
-    this.buf = lines.pop() ?? '';
+    const lines = this.buf.split("\n");
+    this.buf = lines.pop() ?? "";
 
     for (const line of lines) {
       if (!line.trim()) continue;
@@ -82,12 +101,12 @@ export class Player extends EventEmitter {
           this.pending.delete(msg.request_id);
         }
 
-        if (msg.event === 'property-change') {
+        if (msg.event === "property-change") {
           this.onPropChange(msg.name, msg.data);
-        } else if (msg.event === 'end-file') {
-          this.emit('end-file', msg);
-        } else if (msg.event === 'start-file') {
-          this.emit('start-file');
+        } else if (msg.event === "end-file") {
+          this.emit("end-file", msg);
+        } else if (msg.event === "start-file") {
+          this.emit("start-file");
         }
       } catch {}
     }
@@ -96,43 +115,61 @@ export class Player extends EventEmitter {
   private onPropChange(name: string, value: any) {
     if (value == null) return;
     switch (name) {
-      case 'media-title': this.state.title = value; break;
-      case 'pause': this.state.paused = value; break;
-      case 'time-pos': this.state.timePos = value; break;
-      case 'duration': this.state.duration = value; break;
-      case 'volume': this.state.volume = Math.round(value); break;
+      case "media-title":
+        this.state.title = value;
+        break;
+      case "pause":
+        this.state.paused = value;
+        break;
+      case "time-pos":
+        this.state.timePos = value;
+        break;
+      case "duration":
+        this.state.duration = value;
+        break;
+      case "volume":
+        this.state.volume = Math.round(value);
+        break;
     }
-    this.emit('state');
+    this.emit("state");
   }
 
   private send(...args: any[]): Promise<any> {
     return new Promise((resolve) => {
       const id = ++this.reqId;
       this.pending.set(id, resolve);
-      this.socket!.write(JSON.stringify({ command: args, request_id: id }) + '\n');
+      this.socket!.write(
+        JSON.stringify({ command: args, request_id: id }) + "\n",
+      );
     });
   }
 
   async loadTrack(url: string) {
-    await this.send('loadfile', url, 'replace');
+    await this.send("loadfile", url, "replace");
   }
 
-  async togglePause() { await this.send('cycle', 'pause'); }
-  async seek(secs: number) { await this.send('seek', secs, 'relative'); }
+  async togglePause() {
+    await this.send("cycle", "pause");
+  }
+  async seek(secs: number) {
+    await this.send("seek", secs, "relative");
+  }
 
   async quit() {
-    try { await this.send('quit'); } catch {}
+    try {
+      await this.send("quit");
+    } catch {}
     this.socket?.destroy();
     this.proc?.kill();
   }
 
   async setVolume(level: number) {
     const clamped = Math.max(0, Math.min(100, level));
-    await this.send('set_property', 'volume', clamped);
+    await this.send("set_property", "volume", clamped);
   }
 
   async getVolume() {
-    const result = await this.send('get_property', 'volume');
+    const result = await this.send("get_property", "volume");
     return result?.data ?? 100;
   }
 }
