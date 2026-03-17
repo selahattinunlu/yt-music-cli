@@ -1,8 +1,13 @@
 import { createConnection, type Socket } from 'net';
 import { EventEmitter } from 'events';
-import { existsSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
-const SOCKET = '/tmp/yt-music-mpv.sock';
+const IS_WIN = process.platform === 'win32';
+const SOCKET = IS_WIN
+  ? '\\\\.\\pipe\\yt-music-mpv'
+  : join(tmpdir(), 'yt-music-mpv.sock');
 
 export interface PlayerState {
   title: string;
@@ -28,7 +33,9 @@ export class Player extends EventEmitter {
   };
 
   async start() {
-    await Bun.$`rm -f ${SOCKET}`.quiet();
+    if (!IS_WIN) {
+      try { unlinkSync(SOCKET); } catch {}
+    }
 
     this.proc = Bun.spawn(
       ['mpv', '--no-video', '--no-terminal', `--input-ipc-server=${SOCKET}`, '--idle=yes'],
@@ -43,8 +50,16 @@ export class Player extends EventEmitter {
   private async waitForSocket(timeout = 5000): Promise<void> {
     const deadline = Date.now() + timeout;
     while (Date.now() < deadline) {
-      const exists = existsSync(SOCKET);
-      if (exists) return;
+      if (IS_WIN) {
+        const ok = await new Promise<boolean>((resolve) => {
+          const s = createConnection(SOCKET)
+            .on('connect', () => { s.destroy(); resolve(true); })
+            .on('error', () => resolve(false));
+        });
+        if (ok) return;
+      } else {
+        if (existsSync(SOCKET)) return;
+      }
       await Bun.sleep(50);
     }
     throw new Error(`mpv socket did not appear within ${timeout}ms: ${SOCKET}`);
