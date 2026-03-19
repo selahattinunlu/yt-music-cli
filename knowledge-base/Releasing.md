@@ -52,7 +52,11 @@ npm version minor
 npm version major
 ```
 
-### 4. Commit and push
+### 4. Update CHANGELOG.md
+
+Add a new section at the top of `CHANGELOG.md` with the version number and a summary of changes.
+
+### 5. Commit and push
 
 ```sh
 git add .
@@ -60,7 +64,7 @@ git commit -m "chore: release v0.x.x"
 git push origin main
 ```
 
-### 5. Push a version tag
+### 6. Push a version tag
 
 This is what triggers the GitHub Actions release workflow.
 
@@ -74,7 +78,7 @@ The workflow will:
 2. Publish each platform package to npm
 3. Publish the main `yt-music-cli` package to npm
 
-### 6. Verify the release
+### 7. Verify the release
 
 ```sh
 npm info yt-music-cli

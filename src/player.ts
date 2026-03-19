@@ -1,13 +1,14 @@
-import { createConnection, type Socket } from "net";
-import { EventEmitter } from "events";
-import { existsSync, unlinkSync } from "fs";
-import os from "node:os";
-import path from "node:path";
+import { createConnection, type Socket } from 'net';
+import { EventEmitter } from 'events';
+import { existsSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
-const IS_WIN = process.platform === "win32";
+const IS_WIN = process.platform === 'win32';
 const SOCKET = IS_WIN
-  ? "\\\\.\\pipe\\yt-music-mpv"
-  : path.join(os.tmpdir(), "yt-music-mpv.sock");
+  ? '\\\\.\\pipe\\yt-music-mpv'
+  : join(tmpdir(), 'yt-music-mpv.sock');
+
 export interface PlayerState {
   title: string;
   paused: boolean;
@@ -33,9 +34,7 @@ export class Player extends EventEmitter {
 
   async start() {
     if (!IS_WIN) {
-      try {
-        unlinkSync(SOCKET);
-      } catch {}
+      try { unlinkSync(SOCKET); } catch {}
     }
 
     this.proc = Bun.spawn(
@@ -60,11 +59,8 @@ export class Player extends EventEmitter {
       if (IS_WIN) {
         const ok = await new Promise<boolean>((resolve) => {
           const s = createConnection(SOCKET)
-            .on("connect", () => {
-              s.destroy();
-              resolve(true);
-            })
-            .on("error", () => resolve(false));
+            .on('connect', () => { s.destroy(); resolve(true); })
+            .on('error', () => resolve(false));
         });
         if (ok) return;
       } else {

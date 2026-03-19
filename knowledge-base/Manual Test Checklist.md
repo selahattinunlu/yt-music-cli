@@ -146,6 +146,11 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] Ses seviyesi 0-100 araliginda sinirli kalir
 - [ ] Mevcut ses seviyesi player ekraninda gosterilir
 
+## Windows
+
+- [ ] mpv IPC named pipe uzerinden basarili sekilde baglanir
+- [ ] Sarki arama ve calmada herhangi bir sorun olmaz
+
 ## Genel
 
 - [ ] S ile player'dan arama ekranina doner

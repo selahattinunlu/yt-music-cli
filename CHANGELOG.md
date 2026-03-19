@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.1
+
+### Fixes
+
+- Fix Windows support: use named pipes for mpv IPC instead of Unix socket, and use `os.tmpdir()` for cross-platform socket path
+
 ## v0.3.0
 
 ### New Features
