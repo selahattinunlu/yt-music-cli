@@ -2,6 +2,8 @@ import { search, fetchMix } from './search';
 import { Player } from './player';
 import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen, renderPlaylistList, renderPlaylistDetail, renderPlaylistPicker, renderNewPlaylistInput, renderRenamePlaylistInput } from './ui';
 import { loadFavorites, isFavorite, toggleFavorite, loadPlaylists, savePlaylists, createPlaylist, deletePlaylist, renamePlaylist, addTrackToPlaylist, removeTrackFromPlaylist } from './config';
+import { fetchLyrics, type LyricsData } from './lyrics';
+import type { LyricsRenderInput } from './ui';
 import type { Playlist } from './types';
 import type { Track } from './types';
 
@@ -36,6 +38,10 @@ let renamingPlaylistId = '';
 let prePlaylistState: AppState = 'playing';
 let shuffleMode = false;
 let volume = 100;
+let lyricsOpen = false;
+let lyricsData: LyricsData | null = null;
+let lyricsScrollOffset = 0;
+let lyricsLoading = false;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 function shuffleArray(arr: Track[]) {
@@ -48,6 +54,32 @@ function shuffleArray(arr: Track[]) {
 }
 
 const player = new Player();
+
+function lyricsRenderInput(): LyricsRenderInput {
+  return {
+    open: lyricsOpen,
+    loading: lyricsLoading,
+    data: lyricsData,
+    scrollOffset: lyricsScrollOffset,
+    timePos: player.state.timePos ?? 0,
+  };
+}
+
+async function loadLyricsForCurrent() {
+  if (!currentTrack || lyricsLoading) return;
+  lyricsLoading = true;
+  const trackForFetch = currentTrack;
+  try {
+    const data = await fetchLyrics(trackForFetch);
+    if ((currentTrack as Track | null)?.id !== trackForFetch.id) return;
+    lyricsData = data;
+  } finally {
+    lyricsLoading = false;
+  }
+  if (appState === 'playing' && currentTrack) {
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
+  }
+}
 
 // ─── Checks ────────────────────────────────────────────────────────────────
 
@@ -115,7 +147,7 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
   // Refresh display every second for smooth progress bar
   if (renderTimer) clearInterval(renderTimer);
   renderTimer = setInterval(() => {
-    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
   }, 1000);
 
   if (remainingTracks && remainingTracks.length > 0) {
@@ -134,7 +166,7 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
       .finally(() => { fetchingMix = false; });
   }
 
-  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
 }
 
 // ─── Key handlers ───────────────────────────────────────────────────────────
@@ -271,7 +303,7 @@ async function onPlayingKey(key: string) {
       if (currentTrack) {
         const result = toggleFavorite(favorites, currentTrack);
         favorites = result.favorites;
-        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
       }
       break;
     case 'l':
@@ -304,7 +336,7 @@ async function onPlayingKey(key: string) {
     case 'X':
       shuffleMode = !shuffleMode;
       if (shuffleMode && queue.length > 0) shuffleArray(queue);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       break;
     case 's':
     case 'S':
@@ -314,13 +346,13 @@ async function onPlayingKey(key: string) {
     case '=':
       volume = Math.min(100, volume + VOLUME_STEP);
       await player.setVolume(volume);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       break;
     case '-':
     case '_':
       volume = Math.max(0, volume - VOLUME_STEP);
       await player.setVolume(volume);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       break;
     case 'q':
     case 'Q':
@@ -350,9 +382,9 @@ function returnToPlayer() {
   if (currentTrack) {
     appState = 'playing';
     renderTimer = setInterval(() => {
-      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
     }, 1000);
-    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
   } else {
     goToSearch();
   }
