@@ -319,7 +319,8 @@ async function onPlayingKey(key: string) {
       break;
     case DOWN:
       if (lyricsOpen && lyricsData?.status === 'found' && !lyricsData.synced) {
-        lyricsScrollOffset += 1;
+        const maxOffset = Math.max(0, lyricsData.lines.length - 10);
+        lyricsScrollOffset = Math.min(maxOffset, lyricsScrollOffset + 1);
         renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       }
       break;
@@ -334,7 +335,7 @@ async function onPlayingKey(key: string) {
     case 'l':
     case 'L':
       lyricsOpen = !lyricsOpen;
-      if (lyricsOpen && !lyricsData && !lyricsLoading && currentTrack) {
+      if (lyricsOpen && (!lyricsData || lyricsData.status === 'error') && !lyricsLoading && currentTrack) {
         loadLyricsForCurrent();
       }
       renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
