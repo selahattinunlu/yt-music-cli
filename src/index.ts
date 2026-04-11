@@ -204,8 +204,8 @@ async function onSearchInput(key: string) {
       // Stay in command mode on Escape
       return;
     }
-    // Handle L (favorites) shortcut
-    if ((key === 'l' || key === 'L') && !searchQuery) {
+    // Handle H (favorites) shortcut
+    if ((key === 'h' || key === 'H') && !searchQuery) {
       if (favorites.length > 0) {
         appState = 'favorites';
         favSelectedIdx = 0;
