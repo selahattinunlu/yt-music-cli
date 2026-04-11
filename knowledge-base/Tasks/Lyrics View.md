@@ -4,7 +4,7 @@ tags:
   - kb
   - task
 task_id: TASK-003
-status: in-progress
+status: done
 priority: P2
 effort: M
 user_value: 7
