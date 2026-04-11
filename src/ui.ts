@@ -69,7 +69,7 @@ function renderLyricsBlock(lyrics: LyricsRenderInput): string[] {
   }
 
   if (lyrics.data.status === 'error') {
-    pushEmpty(3);
+    pushEmpty(2);
     out.push('  ' + chalk.yellow(centerLine(`Sözler yüklenemedi: ${lyrics.data.message}`)));
     out.push(emptyLine);
     out.push('  ' + chalk.gray(centerLine('L ile tekrar dene')));
