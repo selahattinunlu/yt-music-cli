@@ -74,7 +74,7 @@ export function findActiveLineIdx(lines: LyricsLine[], timePos: number): number 
 
 const cache = new Map<string, LyricsData>();
 const LRCLIB_BASE = 'https://lrclib.net/api/get';
-const FETCH_TIMEOUT_MS = 5000;
+const FETCH_TIMEOUT_MS = 10000;
 const USER_AGENT = 'yt-music-cli (https://github.com/selahattinunlu/yt-music-cli)';
 
 export async function fetchLyrics(track: Track): Promise<LyricsData> {
