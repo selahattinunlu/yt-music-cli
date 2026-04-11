@@ -69,3 +69,81 @@ export function findActiveLineIdx(lines: LyricsLine[], timePos: number): number 
   }
   return idx;
 }
+
+// ─── Fetch + cache ─────────────────────────────────────────────────────────
+
+const cache = new Map<string, LyricsData>();
+const LRCLIB_BASE = 'https://lrclib.net/api/get';
+const FETCH_TIMEOUT_MS = 5000;
+const USER_AGENT = 'yt-music-cli (https://github.com/selahattinunlu/yt-music-cli)';
+
+export async function fetchLyrics(track: Track): Promise<LyricsData> {
+  const cached = cache.get(track.id);
+  if (cached) return cached;
+
+  const { artist, song } = parseTitle(track.title, track.uploader);
+  if (!song) {
+    const nf: LyricsData = { status: 'not-found' };
+    cache.set(track.id, nf);
+    return nf;
+  }
+
+  const params = new URLSearchParams();
+  params.set('track_name', song);
+  if (artist) params.set('artist_name', artist);
+  if (track.duration) params.set('duration', String(Math.round(track.duration)));
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${LRCLIB_BASE}?${params.toString()}`, {
+      headers: { 'User-Agent': USER_AGENT },
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+
+    if (res.status === 404) {
+      const nf: LyricsData = { status: 'not-found' };
+      cache.set(track.id, nf);
+      return nf;
+    }
+    if (!res.ok) {
+      return { status: 'error', message: `Sunucu hatasi (${res.status})` };
+    }
+
+    let body: { syncedLyrics?: string | null; plainLyrics?: string | null };
+    try {
+      body = await res.json() as typeof body;
+    } catch {
+      return { status: 'error', message: 'Gecersiz yanit' };
+    }
+
+    if (body.syncedLyrics && body.syncedLyrics.trim()) {
+      const lines = parseLRC(body.syncedLyrics);
+      if (lines.length > 0) {
+        const data: LyricsData = { status: 'found', lines, synced: true };
+        cache.set(track.id, data);
+        return data;
+      }
+    }
+    if (body.plainLyrics && body.plainLyrics.trim()) {
+      const lines = body.plainLyrics
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(Boolean)
+        .map(text => ({ time: 0, text }));
+      const data: LyricsData = { status: 'found', lines, synced: false };
+      cache.set(track.id, data);
+      return data;
+    }
+
+    const nf: LyricsData = { status: 'not-found' };
+    cache.set(track.id, nf);
+    return nf;
+  } catch (err) {
+    clearTimeout(timer);
+    const message = (err as Error).name === 'AbortError' ? 'Zaman asimi' : 'Ag hatasi';
+    return { status: 'error', message };
+  }
+}
