@@ -64,14 +64,14 @@ Her release oncesi bu listeyi kontrol et.
 
 - [ ] F ile calan sarki favorilere eklenir (kirmizi kalp gosterilir)
 - [ ] F ile tekrar basilinca favorilerden cikarilir (kalp kaybolur)
-- [ ] L ile favori listesi ekranina gidilir
+- [ ] H ile favori listesi ekranina gidilir
 - [ ] Favori listesinde UP/DOWN ile gezinilir
 - [ ] Favori listesinde Enter ile sarki calinir
 - [ ] Favori listesinde Q ile player'a geri doner
 - [ ] Favoriler uygulama kapatilip acildiktan sonra da korunur
-- [ ] Favori yokken L bir sey yapmaz
-- [ ] Arama ekraninda (query bos iken) L ile favori listesine gidilir
-- [ ] Arama ekraninda favori varsa "L  Favoriler" ipucu gosterilir
+- [ ] Favori yokken H bir sey yapmaz
+- [ ] Arama ekraninda (query bos iken) H ile favori listesine gidilir
+- [ ] Arama ekraninda favori varsa "H  Favoriler" ipucu gosterilir
 - [ ] Arama ekraninda playlist varsa "O  Playlistler" ipucu gosterilir
 - [ ] Arama ekraninda (query bos iken) O ile playlist listesine gidilir
 - [ ] Playlist yokken O bir sey yapmaz
@@ -145,6 +145,18 @@ Her release oncesi bu listeyi kontrol et.
 - [ ] - veya _ ile ses seviyesi 5 birim azalir
 - [ ] Ses seviyesi 0-100 araliginda sinirli kalir
 - [ ] Mevcut ses seviyesi player ekraninda gosterilir
+
+## Sozler
+
+- [ ] Bilinen populer sarki calarken L basinca synced sozler aktif satir highlight ile gorunur
+- [ ] Sol/sag ok ile seek yapilinca aktif satir 1 sn icinde guncellenir
+- [ ] L ile ac/kapa/ac/kapa yapilinca anlik toggle olur, ikinci acilista network istegi atilmaz (cache)
+- [ ] Enstrumantal/sozsuz sarki icin "Bu sarki icin soz bulunamadi" mesaji gosterilir
+- [ ] Wi-Fi kapaliyken L basilinca "Sozler yuklenemedi: Ag hatasi" gosterilir; Wi-Fi acilip tekrar L ile retry calisir
+- [ ] N ile sonraki sarkiya gecilirken sozler acikken yeni sarkinin sozleri otomatik yuklenir ve acik kalir
+- [ ] Sadece plain (synced olmayan) sozlu sarkida UP/DOWN ile manuel scroll calisir; synced sarkida UP/DOWN no-op
+- [ ] Player ekraninda H ile favoriler, L ile sozler acilir (rol degisimi dogrulamasi)
+- [ ] Arama ekraninda Esc sonrasi H ile favoriler acilir; L hicbir sey yapmaz
 
 ## Windows
 

@@ -2,6 +2,8 @@ import { search, fetchMix } from './search';
 import { Player } from './player';
 import { renderSearch, renderResults, renderPlayer, renderFavorites, clearScreen, renderPlaylistList, renderPlaylistDetail, renderPlaylistPicker, renderNewPlaylistInput, renderRenamePlaylistInput } from './ui';
 import { loadFavorites, isFavorite, toggleFavorite, loadPlaylists, savePlaylists, createPlaylist, deletePlaylist, renamePlaylist, addTrackToPlaylist, removeTrackFromPlaylist } from './config';
+import { fetchLyrics, type LyricsData } from './lyrics';
+import type { LyricsRenderInput } from './ui';
 import type { Playlist } from './types';
 import type { Track } from './types';
 
@@ -36,6 +38,11 @@ let renamingPlaylistId = '';
 let prePlaylistState: AppState = 'playing';
 let shuffleMode = false;
 let volume = 100;
+let lyricsOpen = false;
+let lyricsData: LyricsData | null = null;
+let lyricsScrollOffset = 0;
+let lyricsLoading = false;
+let lyricsGen = 0;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 function shuffleArray(arr: Track[]) {
@@ -48,6 +55,40 @@ function shuffleArray(arr: Track[]) {
 }
 
 const player = new Player();
+
+function lyricsRenderInput(): LyricsRenderInput {
+  return {
+    open: lyricsOpen,
+    loading: lyricsLoading,
+    data: lyricsData,
+    scrollOffset: lyricsScrollOffset,
+    timePos: player.state.timePos ?? 0,
+  };
+}
+
+async function loadLyricsForCurrent() {
+  if (!currentTrack) return;
+  const myGen = ++lyricsGen;
+  lyricsLoading = true;
+  const trackForFetch = currentTrack;
+  try {
+    const data = await fetchLyrics(trackForFetch);
+    if (lyricsGen !== myGen) return;
+    lyricsData = data;
+  } finally {
+    if (lyricsGen === myGen) lyricsLoading = false;
+  }
+  if (lyricsGen === myGen && appState === 'playing' && currentTrack) {
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
+  }
+}
+
+function resetLyricsForNewTrack() {
+  lyricsData = null;
+  lyricsScrollOffset = 0;
+  lyricsLoading = false;
+  if (lyricsOpen) loadLyricsForCurrent();
+}
 
 // ─── Checks ────────────────────────────────────────────────────────────────
 
@@ -70,6 +111,7 @@ player.on('end-file', async (event: { reason: string }) => {
     if (currentTrack) history.push(currentTrack);
     const next = queue.shift()!;
     currentTrack = next;
+    resetLyricsForNewTrack();
     await player.loadTrack(next.url);
 
     // Refill mix when queue gets low
@@ -109,13 +151,14 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
   if (currentTrack) history.push(currentTrack);
   queue = [];
   currentTrack = track;
+  resetLyricsForNewTrack();
 
   await player.loadTrack(track.url);
 
   // Refresh display every second for smooth progress bar
   if (renderTimer) clearInterval(renderTimer);
   renderTimer = setInterval(() => {
-    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+    if (appState === 'playing' && currentTrack) renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
   }, 1000);
 
   if (remainingTracks && remainingTracks.length > 0) {
@@ -134,7 +177,7 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
       .finally(() => { fetchingMix = false; });
   }
 
-  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+  renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
 }
 
 // ─── Key handlers ───────────────────────────────────────────────────────────
@@ -163,8 +206,8 @@ async function onSearchInput(key: string) {
       // Stay in command mode on Escape
       return;
     }
-    // Handle L (favorites) shortcut
-    if ((key === 'l' || key === 'L') && !searchQuery) {
+    // Handle H (favorites) shortcut
+    if ((key === 'h' || key === 'H') && !searchQuery) {
       if (favorites.length > 0) {
         appState = 'favorites';
         favSelectedIdx = 0;
@@ -247,6 +290,7 @@ async function onPlayingKey(key: string) {
         if (currentTrack) history.push(currentTrack);
         const next = queue.shift()!;
         currentTrack = next;
+        resetLyricsForNewTrack();
         await player.loadTrack(next.url);
         if (queue.length < 5) refillQueue(next.id);
       }
@@ -257,6 +301,7 @@ async function onPlayingKey(key: string) {
         if (currentTrack) queue.unshift(currentTrack);
         const prev = history.pop()!;
         currentTrack = prev;
+        resetLyricsForNewTrack();
         await player.loadTrack(prev.url);
       }
       break;
@@ -266,16 +311,37 @@ async function onPlayingKey(key: string) {
     case RIGHT:
       await player.seek(10);
       break;
+    case UP:
+      if (lyricsOpen && lyricsData?.status === 'found' && !lyricsData.synced) {
+        lyricsScrollOffset = Math.max(0, lyricsScrollOffset - 1);
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
+      }
+      break;
+    case DOWN:
+      if (lyricsOpen && lyricsData?.status === 'found' && !lyricsData.synced) {
+        const maxOffset = Math.max(0, lyricsData.lines.length - 10);
+        lyricsScrollOffset = Math.min(maxOffset, lyricsScrollOffset + 1);
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
+      }
+      break;
     case 'f':
     case 'F':
       if (currentTrack) {
         const result = toggleFavorite(favorites, currentTrack);
         favorites = result.favorites;
-        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
       }
       break;
     case 'l':
     case 'L':
+      lyricsOpen = !lyricsOpen;
+      if (lyricsOpen && (!lyricsData || lyricsData.status === 'error') && !lyricsLoading && currentTrack) {
+        loadLyricsForCurrent();
+      }
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
+      break;
+    case 'h':
+    case 'H':
       if (favorites.length > 0) {
         appState = 'favorites';
         favSelectedIdx = 0;
@@ -304,7 +370,7 @@ async function onPlayingKey(key: string) {
     case 'X':
       shuffleMode = !shuffleMode;
       if (shuffleMode && queue.length > 0) shuffleArray(queue);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       break;
     case 's':
     case 'S':
@@ -314,13 +380,13 @@ async function onPlayingKey(key: string) {
     case '=':
       volume = Math.min(100, volume + VOLUME_STEP);
       await player.setVolume(volume);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       break;
     case '-':
     case '_':
       volume = Math.max(0, volume - VOLUME_STEP);
       await player.setVolume(volume);
-      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
       break;
     case 'q':
     case 'Q':
@@ -350,9 +416,9 @@ function returnToPlayer() {
   if (currentTrack) {
     appState = 'playing';
     renderTimer = setInterval(() => {
-      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume);
+      if (appState === 'playing') renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
     }, 1000);
-    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume);
+    renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
   } else {
     goToSearch();
   }
