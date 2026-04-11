@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import type { PlayerState } from './player';
 import type { Track, Playlist } from './types';
+import type { LyricsData } from './lyrics';
+import { findActiveLineIdx } from './lyrics';
 
 function fmt(sec: number): string {
   if (!sec || isNaN(sec)) return '0:00';
@@ -18,6 +20,108 @@ function bar(pos: number, total: number, width = 36): string {
 
 function clip(str: string, max: number): string {
   return str.length > max ? str.slice(0, max - 1) + '…' : str;
+}
+
+export type LyricsRenderInput = {
+  open: boolean;
+  loading: boolean;
+  data: LyricsData | null;
+  scrollOffset: number;
+  timePos: number;
+};
+
+const LYRICS_WINDOW = 10;
+const LYRICS_MAX_WIDTH = 60;
+
+function centerLine(text: string, width = LYRICS_MAX_WIDTH): string {
+  const visible = text.length > width ? text.slice(0, width - 1) + '…' : text;
+  const pad = Math.max(0, Math.floor((width - visible.length) / 2));
+  return ' '.repeat(pad) + visible;
+}
+
+function renderLyricsBlock(lyrics: LyricsRenderInput): string[] {
+  const out: string[] = [];
+  out.push(chalk.gray('  ── Şarkı Sözleri ─────────────────────'));
+
+  const emptyLine = '  ' + ' '.repeat(LYRICS_MAX_WIDTH);
+  const pushEmpty = (n: number) => { for (let i = 0; i < n; i++) out.push(emptyLine); };
+
+  if (lyrics.loading) {
+    pushEmpty(4);
+    out.push('  ' + chalk.gray(centerLine('Sözler yükleniyor...')));
+    pushEmpty(5);
+    out.push('');
+    return out;
+  }
+
+  if (!lyrics.data) {
+    pushEmpty(LYRICS_WINDOW);
+    out.push('');
+    return out;
+  }
+
+  if (lyrics.data.status === 'not-found') {
+    pushEmpty(4);
+    out.push('  ' + chalk.gray(centerLine('Bu şarkı için söz bulunamadı.')));
+    pushEmpty(5);
+    out.push('');
+    return out;
+  }
+
+  if (lyrics.data.status === 'error') {
+    pushEmpty(3);
+    out.push('  ' + chalk.yellow(centerLine(`Sözler yüklenemedi: ${lyrics.data.message}`)));
+    out.push(emptyLine);
+    out.push('  ' + chalk.gray(centerLine('L ile tekrar dene')));
+    pushEmpty(5);
+    out.push('');
+    return out;
+  }
+
+  // found
+  const lines = lyrics.data.lines;
+  if (lines.length === 0) {
+    pushEmpty(4);
+    out.push('  ' + chalk.gray(centerLine('Bu şarkı için söz bulunamadı.')));
+    pushEmpty(5);
+    out.push('');
+    return out;
+  }
+
+  if (lyrics.data.synced) {
+    const activeIdx = findActiveLineIdx(lines, lyrics.timePos);
+    let start = Math.max(0, activeIdx - 3);
+    const end = Math.min(lines.length, start + LYRICS_WINDOW);
+    start = Math.max(0, end - LYRICS_WINDOW);
+    for (let i = start; i < start + LYRICS_WINDOW; i++) {
+      if (i >= lines.length) {
+        out.push(emptyLine);
+        continue;
+      }
+      const text = clip(lines[i]!.text, LYRICS_MAX_WIDTH - 2);
+      if (i === activeIdx) {
+        out.push('  ' + chalk.cyan.bold(`▶ ${text}`));
+      } else if (i === activeIdx - 1 || i === activeIdx + 1) {
+        out.push('  ' + chalk.white(`  ${text}`));
+      } else {
+        out.push('  ' + chalk.gray(`  ${text}`));
+      }
+    }
+  } else {
+    const maxOffset = Math.max(0, lines.length - LYRICS_WINDOW);
+    const offset = Math.min(lyrics.scrollOffset, maxOffset);
+    for (let i = 0; i < LYRICS_WINDOW; i++) {
+      const srcIdx = offset + i;
+      if (srcIdx >= lines.length) {
+        out.push(emptyLine);
+        continue;
+      }
+      const text = clip(lines[srcIdx]!.text, LYRICS_MAX_WIDTH - 2);
+      out.push('  ' + chalk.white(`  ${text}`));
+    }
+  }
+  out.push('');
+  return out;
 }
 
 export function clearScreen() {
@@ -66,7 +170,7 @@ export function renderResults(tracks: Track[], selected: number) {
 
 const CLR = '\x1B[K'; // clear to end of line
 
-export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false, shuffle = false, volume = 100) {
+export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: boolean, favorite = false, shuffle = false, volume = 100, lyrics?: LyricsRenderInput) {
   const favIcon = favorite ? chalk.red(' ♥') : '';
   const title = clip(state.title || 'Yükleniyor...', 54) + favIcon;
   const shuffleIcon = shuffle ? chalk.magenta('  🔀') : '';
@@ -87,12 +191,14 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
     '',
   ];
 
-  if (fetchingMix && queue.length === 0) {
+  if (lyrics?.open) {
+    lines.push(...renderLyricsBlock(lyrics));
+  } else if (fetchingMix && queue.length === 0) {
     lines.push(chalk.gray('  Mix yükleniyor...'), '');
   } else if (queue.length > 0) {
     lines.push(chalk.gray('  Sırada:'));
     for (let i = 0; i < Math.min(queue.length, 4); i++) {
-      lines.push(chalk.gray(`    ${i + 1}. ${clip(queue[i].title, 52)}`));
+      lines.push(chalk.gray(`    ${i + 1}. ${clip(queue[i]!.title, 52)}`));
     }
     if (queue.length > 4) {
       lines.push(chalk.gray(`    +${queue.length - 4} şarkı daha`));
