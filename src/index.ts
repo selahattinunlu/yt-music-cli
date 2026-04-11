@@ -298,6 +298,18 @@ async function onPlayingKey(key: string) {
     case RIGHT:
       await player.seek(10);
       break;
+    case UP:
+      if (lyricsOpen && lyricsData?.status === 'found' && !lyricsData.synced) {
+        lyricsScrollOffset = Math.max(0, lyricsScrollOffset - 1);
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
+      }
+      break;
+    case DOWN:
+      if (lyricsOpen && lyricsData?.status === 'found' && !lyricsData.synced) {
+        lyricsScrollOffset += 1;
+        renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
+      }
+      break;
     case 'f':
     case 'F':
       if (currentTrack) {
@@ -308,6 +320,14 @@ async function onPlayingKey(key: string) {
       break;
     case 'l':
     case 'L':
+      lyricsOpen = !lyricsOpen;
+      if (lyricsOpen && !lyricsData && !lyricsLoading && currentTrack) {
+        loadLyricsForCurrent();
+      }
+      renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack!.id), shuffleMode, volume, lyricsRenderInput());
+      break;
+    case 'h':
+    case 'H':
       if (favorites.length > 0) {
         appState = 'favorites';
         favSelectedIdx = 0;
