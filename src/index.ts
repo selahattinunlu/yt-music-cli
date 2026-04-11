@@ -81,6 +81,13 @@ async function loadLyricsForCurrent() {
   }
 }
 
+function resetLyricsForNewTrack() {
+  lyricsData = null;
+  lyricsScrollOffset = 0;
+  lyricsLoading = false;
+  if (lyricsOpen) loadLyricsForCurrent();
+}
+
 // ─── Checks ────────────────────────────────────────────────────────────────
 
 async function checkDep(cmd: string): Promise<boolean> {
@@ -102,6 +109,7 @@ player.on('end-file', async (event: { reason: string }) => {
     if (currentTrack) history.push(currentTrack);
     const next = queue.shift()!;
     currentTrack = next;
+    resetLyricsForNewTrack();
     await player.loadTrack(next.url);
 
     // Refill mix when queue gets low
@@ -141,6 +149,7 @@ async function startPlaying(track: Track, remainingTracks?: Track[]) {
   if (currentTrack) history.push(currentTrack);
   queue = [];
   currentTrack = track;
+  resetLyricsForNewTrack();
 
   await player.loadTrack(track.url);
 
@@ -279,6 +288,7 @@ async function onPlayingKey(key: string) {
         if (currentTrack) history.push(currentTrack);
         const next = queue.shift()!;
         currentTrack = next;
+        resetLyricsForNewTrack();
         await player.loadTrack(next.url);
         if (queue.length < 5) refillQueue(next.id);
       }
@@ -289,6 +299,7 @@ async function onPlayingKey(key: string) {
         if (currentTrack) queue.unshift(currentTrack);
         const prev = history.pop()!;
         currentTrack = prev;
+        resetLyricsForNewTrack();
         await player.loadTrack(prev.url);
       }
       break;
