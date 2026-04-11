@@ -138,7 +138,7 @@ export function renderSearch(query: string, hint = '', hasFavorites = false, has
   if (!query && (hasFavorites || hasPlaylists)) {
     out += '\n';
     if (searchMode === 'command') {
-      if (hasFavorites) out += chalk.gray('\n  L  Favoriler');
+      if (hasFavorites) out += chalk.gray('\n  H  Favoriler');
       if (hasPlaylists) out += chalk.gray('\n  O  Playlistler');
     } else {
       out += chalk.gray('\n  (Favori/Playlist\'e erişmek için Esc tuşuna bas)');
@@ -206,8 +206,8 @@ export function renderPlayer(state: PlayerState, queue: Track[], fetchingMix: bo
     lines.push('');
   }
 
-  lines.push(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Liste    +/- Ses'), '');
-  lines.push(chalk.gray('  A Playlist\'e Ekle    O Playlistler    X Karıştır    S Arama    Q Çıkış'), '');
+  lines.push(chalk.gray('  Space Duraklat/Devam    P Önceki    N Sonraki    ←→ ±10s    F Favori    L Sözler    +/- Ses'), '');
+  lines.push(chalk.gray('  A Playlist\'e Ekle    O Playlistler    X Karıştır    H Favoriler    S Arama    Q Çıkış'), '');
 
   // Cursor home, overwrite each line with clear-to-end, then clear remaining below
   process.stdout.write('\x1B[H' + lines.map(l => l + CLR).join('\n') + '\x1B[J');
