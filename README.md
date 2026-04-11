@@ -49,7 +49,10 @@ yt-music
 | `X` | Toggle shuffle |
 | `A` | Add to playlist |
 | `O` | Open playlists |
-| `L` | Open favorites |
+| `L` | Toggle lyrics |
+| `↑` / `↓` | Scroll lyrics (when open, unsynced only) |
+| `H` | Open favorites |
+| `+` / `-` | Volume up / down |
 | `S` | Back to search |
 | `Q` / `Ctrl+C` | Quit |
 
@@ -60,8 +63,9 @@ yt-music
 | Type + `Enter` | Search |
 | `↑` / `↓` | Navigate results |
 | `Enter` | Play selected track |
-| `L` | Open favorites |
-| `O` | Open playlists |
+| `Esc` | Toggle command mode |
+| `H` | Open favorites (command mode) |
+| `O` | Open playlists (command mode) |
 
 ### Playlists
 
@@ -81,6 +85,7 @@ yt-music
 - **Playlists** — Create, rename, and manage playlists with full queue support
 - **Shuffle** — Shuffle the queue with a single keypress
 - **History** — Navigate back to previously played tracks
+- **Lyrics** — Show synced lyrics with the active line highlighted, fetched from [LRCLIB](https://lrclib.net)
 
 ## How it works
 

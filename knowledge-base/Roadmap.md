@@ -14,7 +14,7 @@ Bu not, eski plan dokumanlarindan knowledge base'e tasinan backlog'un kisa harit
 
 - Repeat mode
 - i18n
-- Lyrics
+- ~~Lyrics~~ (tamamlandi — `Tasks/Lyrics View.md`)
 - Config file
 - Search filters
 - Terminal title
@@ -33,6 +33,10 @@ Bu not, eski plan dokumanlarindan knowledge base'e tasinan backlog'un kisa harit
 ### Ses Kontrolu
 
 Sprint 3 planinda `+` / `-` ile ses kontrolu tanimlanmis. Kodda bu davranis uygulanmis durumda ve player ekraninda ses seviyesi gosteriliyor.
+
+### Lyrics
+
+Tamamlandi. `L` tusu playing state'te sarki sozleri alt-modunu acar/kapatir; Favoriler `H` tusuna tasindi. Kaynak LRCLIB. Detay: `Specs/2026-04-11-lyrics-view-design.md`.
 
 ### i18n
 

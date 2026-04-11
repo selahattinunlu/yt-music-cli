@@ -16,9 +16,11 @@ flowchart TD
     A --> C[src/player.ts]
     A --> D[src/ui.ts]
     A --> E[src/config.ts]
+    A --> L[src/lyrics.ts]
     E --> F[~/.config/yt-music-cli]
     B --> G[yt-dlp]
     C --> H[mpv IPC socket]
+    L --> I[lrclib.net]
 ```
 
 ## Modul Sorumluluklari
@@ -58,6 +60,13 @@ flowchart TD
 ### `src/types.ts`
 
 - `Track` ve `Playlist` veri kontratlari burada tanimli
+
+### `src/lyrics.ts`
+
+- LRCLIB API uzerinden sarki sozleri cekilir (`fetch`)
+- Basit title parser ile YouTube basligindan artist/song ayrismasi
+- LRC formati parse edilerek zamanli satirlar uretilir
+- Memory cache ile ayni track icin tekrar istek atilmaz
 
 ## Mimari Karakteri
 

@@ -31,11 +31,13 @@ Tarayici acmadan, reklam ve gorsel dikkat dagitici unsurlar olmadan hizli muzik 
 - Playlist'e sarki ekleme ve playlist detayindan calma
 - Shuffle modu
 - Ses seviyesi gosterimi ve kontrolu
+- Sarki sozleri gorunumu (LRCLIB kaynakli, zamanli satir highlight)
 
 ## Temel Harici Bagimliliklar
 
 - `mpv`: ses oynatma ve runtime kontrolu
 - `yt-dlp`: YouTube arama ve mix metadata cekme
+- `lrclib.net`: sarki sozleri (zamanli LRC ve plain metin)
 - Bun runtime
 
 ## Kullanim Modeli

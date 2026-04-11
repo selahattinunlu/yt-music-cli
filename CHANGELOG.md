@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### New Features
+
+- **Lyrics View** — Press `L` during playback to open a lyrics sub-mode inside the player screen. Synced (LRC) lyrics are fetched from [LRCLIB](https://lrclib.net) and the active line is highlighted; plain (unsynced) lyrics can be scrolled with `↑` / `↓`. Lyrics are cached in memory for the session and are automatically re-fetched on track change while the panel stays open.
+
+### Breaking Changes
+
+- **Favorites keybinding moved from `L` to `H`** to free `L` for lyrics. This applies both in the player screen and in the search screen's command mode (after pressing `Esc`).
+
 ## v0.3.1
 
 ### Fixes
