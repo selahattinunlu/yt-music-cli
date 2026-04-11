@@ -595,15 +595,15 @@ async function loadLyricsForCurrent() {
 
 - [ ] **Step 4: Update every `renderPlayer(...)` call site to pass `lyricsRenderInput()`**
 
-There are **six** call sites in `src/index.ts`. Find each and add `lyricsRenderInput()` as the final argument. Use Grep to find them:
+There are **8** call sites in `src/index.ts`. Find each and add `lyricsRenderInput()` as the final argument. Use grep to enumerate them:
 
 ```bash
-# You can run: grep -n "renderPlayer(" src/index.ts
+grep -n "renderPlayer(" src/index.ts
 ```
 
 Each currently ends with `..., shuffleMode, volume)`. Change each to `..., shuffleMode, volume, lyricsRenderInput())`.
 
-Sites (approximate line numbers, verify before editing):
+Expected sites:
 1. Inside the `setInterval` in `startPlaying`
 2. The one-shot call at the end of `startPlaying`
 3. Inside the `F` case in `onPlayingKey`
@@ -613,7 +613,7 @@ Sites (approximate line numbers, verify before editing):
 7. Inside the `setInterval` in `returnToPlayer`
 8. The one-shot call at the end of `returnToPlayer`
 
-(That's actually 8 — double check with grep.)
+Verify your grep count matches — if fewer, you missed the helper you added in Task 5 Step 3 (`loadLyricsForCurrent`), which also contains a `renderPlayer` call but is correct as written (it already passes `lyricsRenderInput()`).
 
 - [ ] **Step 5: Verify type-check**
 
