@@ -266,7 +266,7 @@ const offset = Math.min(scrollOffset, maxOffset);  // clamp
 
 (Eski `L Liste` → kaldirildi; `H Favoriler` yeni; `L Sozler` yeni.)
 
-**Search ekrani hint'i (`renderSearch`):** Command mode'da `L Favoriler` satiri `H Favoriler` olarak degisir.
+**Search ekrani hint'i (`renderSearch`):** Command mode'da `L Favoriler` satiri `H Favoriler` olarak degisir. Somut olarak: `src/ui.ts` icinde `'  L  Favoriler'` olarak gecen hardcoded string `'  H  Favoriler'` olur.
 
 ## Hata Isleme ve Kenar Durumlari
 
