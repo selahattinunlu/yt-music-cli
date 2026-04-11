@@ -42,6 +42,7 @@ let lyricsOpen = false;
 let lyricsData: LyricsData | null = null;
 let lyricsScrollOffset = 0;
 let lyricsLoading = false;
+let lyricsGen = 0;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
 function shuffleArray(arr: Track[]) {
@@ -66,17 +67,18 @@ function lyricsRenderInput(): LyricsRenderInput {
 }
 
 async function loadLyricsForCurrent() {
-  if (!currentTrack || lyricsLoading) return;
+  if (!currentTrack) return;
+  const myGen = ++lyricsGen;
   lyricsLoading = true;
   const trackForFetch = currentTrack;
   try {
     const data = await fetchLyrics(trackForFetch);
-    if ((currentTrack as Track | null)?.id !== trackForFetch.id) return;
+    if (lyricsGen !== myGen) return;
     lyricsData = data;
   } finally {
-    lyricsLoading = false;
+    if (lyricsGen === myGen) lyricsLoading = false;
   }
-  if (appState === 'playing' && currentTrack) {
+  if (lyricsGen === myGen && appState === 'playing' && currentTrack) {
     renderPlayer(player.state, queue, fetchingMix, isFavorite(favorites, currentTrack.id), shuffleMode, volume, lyricsRenderInput());
   }
 }
