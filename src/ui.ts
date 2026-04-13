@@ -131,7 +131,7 @@ export function renderFavorites(favorites: Track[], selected: number) {
     }
   }
 
-  out += chalk.gray('\n  ↑↓  Gezin    Enter  Çal    Q  Geri\n') + '\n';
+  out += chalk.gray('\n  ↑↓  Gezin    Enter  Çal    A  Tümünü Çal    Q  Geri\n') + '\n';
   process.stdout.write(out);
 }
 

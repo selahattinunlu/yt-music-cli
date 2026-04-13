@@ -339,6 +339,15 @@ async function onFavoritesKey(key: string) {
     renderFavorites(favorites, favSelectedIdx);
   } else if (key === '\r' || key === '\n') {
     await startPlaying(favorites[favSelectedIdx]);
+  } else if ((key === 'a' || key === 'A') && favorites.length > 0) {
+    const rest: typeof favorites = [];
+    for (let i = favSelectedIdx + 1; i < favorites.length - 1; i++) {
+      rest.push(favorites[i]);
+    }
+    for (let i = 0; i < favSelectedIdx; i++) {
+      rest.push(favorites[i]);
+    }
+    await startPlaying(favorites[favSelectedIdx], rest);
   } else if (key === 'q' || key === 'Q') {
     returnToPlayer();
   }
